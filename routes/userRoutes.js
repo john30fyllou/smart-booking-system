@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/roleMiddleware');
 
 const { getAllUsers, 
         registerUser,
@@ -16,5 +17,15 @@ router.get('/profile', authenticateToken,(req, res) =>{
         user: req.user
     });
 });
+router.get(
+    '/provider-area',
+    authenticateToken,
+    authorizeRoles('provider', 'admin'),
+    (req, res) => {
+        res.status(200).json({
+            message: 'Welcome to the provider area'
+        });
+    }
+);
 
 module.exports = router;
