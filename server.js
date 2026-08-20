@@ -3,7 +3,10 @@ require('dotenv').config();
 const express = require('express');
 require('./db');
 
+const categoryRoutes = require('./routes/categoryRoutes');
 const userRoutes = require('./routes/userRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
+const availabilityRoutes = require('./routes/availabilityRoutes');
 
 const app = express();
 const PORT = 3000;
@@ -15,6 +18,9 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/availability', availabilityRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
