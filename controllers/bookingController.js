@@ -323,9 +323,11 @@ const updateBookingStatus = (req, res) => {
     const findBookingSql = `
         SELECT
             bookings.id,
+            bookings.status,
             services.provider_id
         FROM bookings
-        JOIN services ON bookings.service_id = services.id
+        JOIN services
+            ON bookings.service_id = services.id
         WHERE bookings.id = ?
     `;
 
@@ -355,6 +357,21 @@ const updateBookingStatus = (req, res) => {
             });
         }
 
+        const validTransitions = {
+            pending: ['approved', 'cancelled'],
+            approved: ['completed', 'cancelled'],
+            cancelled: [],
+            completed: []
+        };
+
+        const currentStatus = booking.status;
+
+        if (!validTransitions[currentStatus].includes(status)) {
+            return res.status(400).json({
+                message: `Cannot change booking status from ${currentStatus} to ${status}`
+            });
+        }
+
         const updateSql = `
             UPDATE bookings
             SET status = ?
@@ -379,10 +396,83 @@ const updateBookingStatus = (req, res) => {
                 res.status(200).json({
                     message: 'Booking status updated successfully',
                     bookingId: Number(bookingId),
+                    previousStatus: currentStatus,
                     status: status
                 });
             }
         );
+    });
+};
+
+const cancelBooking = (req, res) => {
+    const bookingId = req.params.id;
+    const customerId = req.user.id;
+
+    const findBookingSql = `
+        SELECT
+            id,
+            customer_id,
+            status
+        FROM bookings
+        WHERE id = ?
+    `;
+
+    db.query(findBookingSql, [bookingId], (err, results) => {
+        if (err) {
+            console.error('Error fetching booking:', err);
+
+            return res.status(500).json({
+                message: 'Database error'
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                message: 'Booking not found'
+            });
+        }
+
+        const booking = results[0];
+
+        if (
+            req.user.role !== 'admin' &&
+            booking.customer_id !== customerId
+        ) {
+            return res.status(403).json({
+                message: 'Access denied'
+            });
+        }
+
+        if (
+            booking.status === 'cancelled' ||
+            booking.status === 'completed'
+        ) {
+            return res.status(400).json({
+                message: `Cannot cancel a ${booking.status} booking`
+            });
+        }
+
+        const updateSql = `
+            UPDATE bookings
+            SET status = 'cancelled'
+            WHERE id = ?
+        `;
+
+        db.query(updateSql, [bookingId], (err) => {
+            if (err) {
+                console.error('Error cancelling booking:', err);
+
+                return res.status(500).json({
+                    message: 'Database error'
+                });
+            }
+
+            res.status(200).json({
+                message: 'Booking cancelled successfully',
+                bookingId: Number(bookingId),
+                status: 'cancelled'
+            });
+        });
     });
 };
 
@@ -391,5 +481,6 @@ module.exports = {
     getMyBookings,
     getProviderBookings,
     createBooking,
-    updateBookingStatus
+    updateBookingStatus,
+    cancelBooking
 };

@@ -9,7 +9,7 @@ const getAllUsers = (req, res) => {
         if (err) {
             console.error('error fetching users: ', err);
             return res.status(500).json({
-                message:'Database error',
+                message: 'Database error',
             });
         }
         res.status(200).json(results);
