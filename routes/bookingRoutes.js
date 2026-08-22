@@ -14,7 +14,12 @@ const {
     cancelBooking
 } = require('../controllers/bookingController');
 
-router.get('/', getAllBookings);
+router.get(
+    '/',
+    authenticateToken,
+    authorizeRoles('admin'),
+    getAllBookings
+);
 
 router.get(
     '/my',

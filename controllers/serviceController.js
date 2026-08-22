@@ -80,7 +80,193 @@ const createService = (req, res) => {
     );
 };
 
+const updateService = (req, res) => {
+    const serviceId = req.params.id;
+
+    const {
+        category_id,
+        name,
+        description,
+        duration_minutes,
+        price
+    } = req.body;
+
+    if (!category_id || !name || !duration_minutes || !price) {
+        return res.status(400).json({
+            message: 'Category, name, duration and price are required'
+        });
+    }
+
+    const findSql = `
+        SELECT id, provider_id
+        FROM services
+        WHERE id = ?
+    `;
+
+    db.query(findSql, [serviceId], (err, results) => {
+        if (err) {
+            console.error('Error fetching service:', err);
+
+            return res.status(500).json({
+                message: 'Database error'
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                message: 'Service not found'
+            });
+        }
+
+        const service = results[0];
+
+        if (
+            req.user.role === 'provider' &&
+            service.provider_id !== req.user.id
+        ) {
+            return res.status(403).json({
+                message: 'Access denied'
+            });
+        }
+
+        const updateSql = `
+            UPDATE services
+            SET
+                category_id = ?,
+                name = ?,
+                description = ?,
+                duration_minutes = ?,
+                price = ?
+            WHERE id = ?
+        `;
+
+        db.query(
+            updateSql,
+            [
+                category_id,
+                name,
+                description || null,
+                duration_minutes,
+                price,
+                serviceId
+            ],
+            (err) => {
+                if (err) {
+                    console.error('Error updating service:', err);
+
+                    return res.status(500).json({
+                        message: 'Database error'
+                    });
+                }
+
+                res.status(200).json({
+                    message: 'Service updated successfully',
+                    serviceId: Number(serviceId)
+                });
+            }
+        );
+    });
+};
+
+const deleteService = (req, res) => {
+    const serviceId = req.params.id;
+
+    const findSql = `
+        SELECT id, provider_id
+        FROM services
+        WHERE id = ?
+    `;
+
+    db.query(findSql, [serviceId], (err, results) => {
+        if (err) {
+            console.error('Error fetching service:', err);
+
+            return res.status(500).json({
+                message: 'Database error'
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                message: 'Service not found'
+            });
+        }
+
+        const service = results[0];
+
+        if (
+            req.user.role === 'provider' &&
+            service.provider_id !== req.user.id
+        ) {
+            return res.status(403).json({
+                message: 'Access denied'
+            });
+        }
+
+        const bookingCheckSql = `
+            SELECT id
+            FROM bookings
+            WHERE service_id = ?
+            LIMIT 1
+        `;
+
+        db.query(
+            bookingCheckSql,
+            [serviceId],
+            (err, bookingResults) => {
+                if (err) {
+                    console.error(
+                        'Error checking service bookings:',
+                        err
+                    );
+
+                    return res.status(500).json({
+                        message: 'Database error'
+                    });
+                }
+
+                if (bookingResults.length > 0) {
+                    return res.status(409).json({
+                        message:
+                            'Service cannot be deleted because it has existing bookings'
+                    });
+                }
+
+                const deleteSql = `
+                    DELETE FROM services
+                    WHERE id = ?
+                `;
+
+                db.query(
+                    deleteSql,
+                    [serviceId],
+                    (err) => {
+                        if (err) {
+                            console.error(
+                                'Error deleting service:',
+                                err
+                            );
+
+                            return res.status(500).json({
+                                message: 'Database error'
+                            });
+                        }
+
+                        res.status(200).json({
+                            message:
+                                'Service deleted successfully',
+                            serviceId: Number(serviceId)
+                        });
+                    }
+                );
+            }
+        );
+    });
+};
+
 module.exports = {
     getAllServices,
-    createService
+    createService,
+    updateService,
+    deleteService
 };

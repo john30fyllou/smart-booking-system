@@ -6,7 +6,9 @@ const router = express.Router();
 
 const {
     getAvailability,
-    createAvailability
+    createAvailability,
+    updateAvailability,
+    deleteAvailability
 } = require('../controllers/availabilityController');
 
 router.get('/', getAvailability);
@@ -17,4 +19,19 @@ router.post(
     authorizeRoles('provider', 'admin'),
     createAvailability
 );
+
+router.put(
+    '/:id',
+    authenticateToken,
+    authorizeRoles('provider', 'admin'),
+    updateAvailability
+);
+
+router.delete(
+    '/:id',
+    authenticateToken,
+    authorizeRoles('provider', 'admin'),
+    deleteAvailability
+);
+
 module.exports = router;
