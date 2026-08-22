@@ -4,6 +4,7 @@ const getAllServices = (req, res) => {
     const sql = `
         SELECT
             services.id,
+            services.provider_id,
             services.name,
             services.description,
             services.duration_minutes,

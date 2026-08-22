@@ -1,6 +1,8 @@
 require('dotenv').config();
 
 const express = require('express');
+const cors = require('cors');
+
 require('./db');
 
 const categoryRoutes = require('./routes/categoryRoutes');
@@ -13,6 +15,7 @@ const intentRoutes = require('./routes/intentRoutes');
 const app = express();
 const PORT = 3000;
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {

@@ -11,8 +11,16 @@ const {
     getProviderBookings,
     createBooking,
     updateBookingStatus,
-    cancelBooking
+    cancelBooking,
+    getAvailableSlots
 } = require('../controllers/bookingController');
+
+router.get(
+    '/available-slots',
+    authenticateToken,
+    authorizeRoles('customer', 'admin'),
+    getAvailableSlots
+);
 
 router.get(
     '/',

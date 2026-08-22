@@ -476,11 +476,200 @@ const cancelBooking = (req, res) => {
     });
 };
 
+const getAvailableSlots = (req, res) => {
+    const serviceId = Number(req.query.service_id);
+    const bookingDate = req.query.date;
+
+    if (!serviceId || !bookingDate) {
+        return res.status(400).json({
+            message: 'Service and date are required'
+        });
+    }
+
+    const serviceSql = `
+        SELECT
+            id,
+            provider_id,
+            duration_minutes
+        FROM services
+        WHERE id = ?
+    `;
+
+    db.query(
+        serviceSql,
+        [serviceId],
+        (serviceError, serviceResults) => {
+            if (serviceError) {
+                console.error(serviceError);
+
+                return res.status(500).json({
+                    message: 'Database error'
+                });
+            }
+
+            if (serviceResults.length === 0) {
+                return res.status(404).json({
+                    message: 'Service not found'
+                });
+            }
+
+            const service = serviceResults[0];
+
+            const availabilitySql = `
+                SELECT
+                    start_time,
+                    end_time
+                FROM availability
+                WHERE provider_id = ?
+                AND available_date = ?
+            `;
+
+            db.query(
+                availabilitySql,
+                [
+                    service.provider_id,
+                    bookingDate
+                ],
+                (availabilityError, availabilityResults) => {
+                    if (availabilityError) {
+                        console.error(availabilityError);
+
+                        return res.status(500).json({
+                            message: 'Database error'
+                        });
+                    }
+
+                    if (availabilityResults.length === 0) {
+                        return res.status(200).json({
+                            slots: []
+                        });
+                    }
+
+                    const bookingsSql = `
+                        SELECT
+                            bookings.start_time,
+                            bookings.end_time
+                            FROM bookings
+                            JOIN services
+                            ON bookings.service_id = services.id
+                            WHERE services.provider_id = ?
+                            AND bookings.booking_date = ?
+                            AND bookings.status IN ('pending', 'approved')
+                    `;
+
+                    db.query(
+                        bookingsSql,
+                        [
+                            service.provider_id,
+                            bookingDate
+                        ],
+                        (bookingsError, bookings) => {
+                            if (bookingsError) {
+                                console.error(bookingsError);
+
+                                return res.status(500).json({
+                                    message: 'Database error'
+                                });
+                            }
+
+                            const duration =
+                                Number(service.duration_minutes);
+
+                            const slots = [];
+
+                            const timeToMinutes = (time) => {
+                                const [hours, minutes] =
+                                    time.split(':').map(Number);
+
+                                return hours * 60 + minutes;
+                            };
+
+                            const minutesToTime = (minutes) => {
+                                const hours =
+                                    Math.floor(minutes / 60);
+
+                                const mins =
+                                    minutes % 60;
+
+                                return (
+                                    String(hours).padStart(2, '0') +
+                                    ':' +
+                                    String(mins).padStart(2, '0')
+                                );
+                            };
+
+                            availabilityResults.forEach(
+                                (availability) => {
+                                    let current =
+                                        timeToMinutes(
+                                            availability.start_time
+                                        );
+
+                                    const availabilityEnd =
+                                        timeToMinutes(
+                                            availability.end_time
+                                        );
+
+                                    while (
+                                        current + duration <=
+                                        availabilityEnd
+                                    ) {
+                                        const slotStart = current;
+                                        const slotEnd =
+                                            current + duration;
+
+                                        const hasConflict =
+                                            bookings.some(
+                                                (booking) => {
+                                                    const bookedStart =
+                                                        timeToMinutes(
+                                                            booking.start_time
+                                                        );
+
+                                                    const bookedEnd =
+                                                        timeToMinutes(
+                                                            booking.end_time
+                                                        );
+
+                                                    return (
+                                                        slotStart < bookedEnd &&
+                                                        slotEnd > bookedStart
+                                                    );
+                                                }
+                                            );
+
+                                        if (!hasConflict) {
+                                            slots.push(
+                                                minutesToTime(
+                                                    slotStart
+                                                )
+                                            );
+                                        }
+
+                                        current += duration;
+                                    }
+                                }
+                            );
+
+                            return res.status(200).json({
+                                serviceId,
+                                bookingDate,
+                                slots
+                            });
+                        }
+                    );
+                }
+            );
+        }
+    );
+};
+
 module.exports = {
     getAllBookings,
     getMyBookings,
     getProviderBookings,
     createBooking,
     updateBookingStatus,
-    cancelBooking
+    cancelBooking,
+    getAvailableSlots
 };
