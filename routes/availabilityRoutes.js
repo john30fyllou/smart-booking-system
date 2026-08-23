@@ -13,25 +13,10 @@ const {
 
 router.get('/', getAvailability);
 
-router.post(
-    '/',
-    authenticateToken,
-    authorizeRoles('provider', 'admin'),
-    createAvailability
-);
+router.post('/', authenticateToken, authorizeRoles('provider', 'admin'), createAvailability);
 
-router.put(
-    '/:id',
-    authenticateToken,
-    authorizeRoles('provider', 'admin'),
-    updateAvailability
-);
+router.put('/:id', authenticateToken, authorizeRoles('provider', 'admin'), updateAvailability);
 
-router.delete(
-    '/:id',
-    authenticateToken,
-    authorizeRoles('provider', 'admin'),
-    deleteAvailability
-);
+router.delete('/:id', authenticateToken, authorizeRoles('provider', 'admin'), deleteAvailability);
 
 module.exports = router;

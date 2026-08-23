@@ -1,272 +1,195 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="el">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Πάροχος - Smart Booking System</title>
 
-    <title>Πάροχος - Smart Booking System</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
 
-    <link rel="stylesheet" href="css/style.css">
-</head>
+    <body>
+        <header>
+            <div class="container">
+                <h1>Smart Booking System</h1>
 
-<body>
+                <nav>
+                    <a href="provider.html">Αρχική</a>
+                    <a href="#bookings">Ραντεβού</a>
+                    <a href="#services">Υπηρεσίες</a>
+                    <a href="#availability">Διαθεσιμότητα</a>
 
-    <header>
-        <div class="container">
-
-            <h1>Smart Booking System</h1>
-
-            <nav>
-                <a href="provider.html">Αρχική</a>
-                <a href="#bookings">Ραντεβού</a>
-                <a href="#services">Υπηρεσίες</a>
-                <a href="#availability">Διαθεσιμότητα</a>
-
-                <button id="logoutBtn" class="nav-button">
-                    Αποσύνδεση
-                </button>
-            </nav>
-
-        </div>
-    </header>
-
-
-    <main class="dashboard">
-
-        <section class="container dashboard-section">
-
-            <h2>Πίνακας Παρόχου</h2>
-
-            <p>
-                Διαχειρίσου τα ραντεβού, τις υπηρεσίες
-                και τη διαθεσιμότητά σου.
-            </p>
-
-        </section>
-
-
-        <section id="bookings" class="container dashboard-section">
-
-            <h2>Ραντεβού</h2>
-
-            <div id="providerBookingsList" class="cards-grid">
-                <p>Φόρτωση ραντεβού...</p>
+                    <button id="logoutBtn" class="nav-button">Αποσύνδεση</button>
+                </nav>
             </div>
+        </header>
 
-        </section>
+        <main class="dashboard">
+            <section class="container dashboard-section">
+                <h2>Πίνακας Παρόχου</h2>
 
+                <p>Διαχειρίσου τα ραντεβού, τις υπηρεσίες και τη διαθεσιμότητά σου.</p>
+            </section>
 
-        <section id="services" class="container dashboard-section">
+            <section id="bookings" class="container dashboard-section">
+                <h2>Ραντεβού</h2>
 
-            <h2>Οι υπηρεσίες μου</h2>
+                <div id="providerBookingsList" class="cards-grid">
+                    <p>Φόρτωση ραντεβού...</p>
+                </div>
+            </section>
 
-            <div class="dashboard-card">
+            <section id="services" class="container dashboard-section">
+                <h2>Οι υπηρεσίες μου</h2>
 
-                <h3>Προσθήκη υπηρεσίας</h3>
+                <div class="dashboard-card">
+                    <h3>Προσθήκη υπηρεσίας</h3>
 
-                <form id="serviceForm">
+                    <form id="serviceForm">
+                        <div class="form-group">
+                            <label for="serviceCategory"> Κατηγορία </label>
 
-                    <div class="form-group">
-                        <label for="serviceCategory">
-                            Κατηγορία
-                        </label>
-
-                        <select id="serviceCategory" required>
-                            <option value="">
-                                Επίλεξε κατηγορία
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="serviceName">
-                            Όνομα υπηρεσίας
-                        </label>
-
-                        <input type="text" id="serviceName" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="serviceDescription">
-                            Περιγραφή
-                        </label>
-
-                        <textarea id="serviceDescription" rows="4"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="serviceDuration">
-                            Διάρκεια (λεπτά)
-                        </label>
-
-                        <input type="number" id="serviceDuration" min="5" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="servicePrice">
-                            Τιμή (€)
-                        </label>
-
-                        <input type="number" id="servicePrice" min="0" step="0.01" required>
-                    </div>
-
-                    <button type="submit" class="btn" id="serviceSubmitBtn">
-                        Προσθήκη
-                    </button>
-
-                </form>
-
-                <p id="serviceMessage" class="message"></p>
-
-            </div>
-
-            <div id="providerServicesList" class="cards-grid">
-                <p>Φόρτωση υπηρεσιών...</p>
-            </div>
-
-        </section>
-
-
-        <section id="availability" class="container dashboard-section">
-
-            <h2>Η διαθεσιμότητά μου</h2>
-
-            <div class="dashboard-card">
-
-                <h3>Προσθήκη διαθεσιμότητας</h3>
-
-                <form id="availabilityForm">
-
-                    <div class="form-group">
-
-                        <label for="availabilityDate">
-                            Ημερομηνία
-                        </label>
-
-                        <input type="date" id="availabilityDate" required>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Ώρα έναρξης
-                        </label>
-
-                        <div class="time-picker">
-
-                            <select id="availabilityStartHour" required>
-                                <option value="">
-                                    Ώρα
-                                </option>
-
-                                <option value="08">08</option>
-                                <option value="09">09</option>
-                                <option value="10">10</option>
-                                <option value="11">11</option>
-                                <option value="12">12</option>
-                                <option value="13">13</option>
-                                <option value="14">14</option>
-                                <option value="15">15</option>
-                                <option value="16">16</option>
-                                <option value="17">17</option>
-                                <option value="18">18</option>
-                                <option value="19">19</option>
-                                <option value="20">20</option>
-                                <option value="21">21</option>
+                            <select id="serviceCategory" required>
+                                <option value="">Επίλεξε κατηγορία</option>
                             </select>
-
-                            <span>:</span>
-
-                            <select id="availabilityStartMinute" required>
-                                <option value="">
-                                    Λεπτά
-                                </option>
-
-                                <option value="00">00</option>
-                                <option value="30">30</option>
-                            </select>
-
                         </div>
 
-                    </div>
+                        <div class="form-group">
+                            <label for="serviceName"> Όνομα υπηρεσίας </label>
 
-
-                    <div class="form-group">
-
-                        <label>
-                            Ώρα λήξης
-                        </label>
-
-                        <div class="time-picker">
-
-                            <select id="availabilityEndHour" required>
-                                <option value="">
-                                    Ώρα
-                                </option>
-
-                                <option value="08">08</option>
-                                <option value="09">09</option>
-                                <option value="10">10</option>
-                                <option value="11">11</option>
-                                <option value="12">12</option>
-                                <option value="13">13</option>
-                                <option value="14">14</option>
-                                <option value="15">15</option>
-                                <option value="16">16</option>
-                                <option value="17">17</option>
-                                <option value="18">18</option>
-                                <option value="19">19</option>
-                                <option value="20">20</option>
-                                <option value="21">21</option>
-                            </select>
-
-                            <span>:</span>
-
-                            <select id="availabilityEndMinute" required>
-                                <option value="">
-                                    Λεπτά
-                                </option>
-
-                                <option value="00">00</option>
-                                <option value="30">30</option>
-                            </select>
-
+                            <input type="text" id="serviceName" required />
                         </div>
 
-                    </div>
+                        <div class="form-group">
+                            <label for="serviceDescription"> Περιγραφή </label>
 
+                            <textarea id="serviceDescription" rows="4"></textarea>
+                        </div>
 
-                    <button type="submit" class="btn" id="availabilitySubmitBtn">
-                        Προσθήκη
-                    </button>
+                        <div class="form-group">
+                            <label for="serviceDuration"> Διάρκεια (λεπτά) </label>
 
-                </form>
+                            <input type="number" id="serviceDuration" min="5" required />
+                        </div>
 
-                <p id="availabilityMessage" class="message"></p>
+                        <div class="form-group">
+                            <label for="servicePrice"> Τιμή (€) </label>
 
-            </div>
+                            <input type="number" id="servicePrice" min="0" step="0.01" required />
+                        </div>
 
+                        <button type="submit" class="btn" id="serviceSubmitBtn">Προσθήκη</button>
+                    </form>
 
-            <div id="providerAvailabilityList" class="cards-grid">
-                <p>Φόρτωση διαθεσιμότητας...</p>
-            </div>
+                    <p id="serviceMessage" class="message"></p>
+                </div>
 
-        </section>
+                <div id="providerServicesList" class="cards-grid">
+                    <p>Φόρτωση υπηρεσιών...</p>
+                </div>
+            </section>
 
-    </main>
+            <section id="availability" class="container dashboard-section">
+                <h2>Η διαθεσιμότητά μου</h2>
 
+                <div class="dashboard-card">
+                    <h3>Προσθήκη διαθεσιμότητας</h3>
 
-    <footer>
-        <p>Smart Booking System</p>
-    </footer>
+                    <form id="availabilityForm">
+                        <div class="form-group">
+                            <label for="availabilityDate"> Ημερομηνία </label>
 
+                            <input type="date" id="availabilityDate" required />
+                        </div>
 
-    <script src="js/api.js"></script>
-    <script src="js/provider.js"></script>
+                        <div class="form-group">
+                            <label> Ώρα έναρξης </label>
 
-</body>
+                            <div class="time-picker">
+                                <select id="availabilityStartHour" required>
+                                    <option value="">Ώρα</option>
 
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                </select>
+
+                                <span>:</span>
+
+                                <select id="availabilityStartMinute" required>
+                                    <option value="">Λεπτά</option>
+
+                                    <option value="00">00</option>
+                                    <option value="30">30</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label> Ώρα λήξης </label>
+
+                            <div class="time-picker">
+                                <select id="availabilityEndHour" required>
+                                    <option value="">Ώρα</option>
+
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                </select>
+
+                                <span>:</span>
+
+                                <select id="availabilityEndMinute" required>
+                                    <option value="">Λεπτά</option>
+
+                                    <option value="00">00</option>
+                                    <option value="30">30</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn" id="availabilitySubmitBtn">
+                            Προσθήκη
+                        </button>
+                    </form>
+
+                    <p id="availabilityMessage" class="message"></p>
+                </div>
+
+                <div id="providerAvailabilityList" class="cards-grid">
+                    <p>Φόρτωση διαθεσιμότητας...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Smart Booking System</p>
+        </footer>
+
+        <script src="js/api.js"></script>
+        <script src="js/provider.js"></script>
+    </body>
 </html>

@@ -9,7 +9,7 @@ const getAllUsers = (req, res) => {
         if (err) {
             console.error('error fetching users: ', err);
             return res.status(500).json({
-                message: 'Database error',
+                message: 'Database error'
             });
         }
         res.status(200).json(results);
@@ -33,25 +33,20 @@ const registerUser = async (req, res) => {
             VALUES (?, ?, ?, ?)
         `;
 
-        db.query(
-            sql,
-            [first_name, last_name, email, hashedPassword],
-            (err, result) => {
-                if (err) {
-                    console.error('Error creating user:', err);
+        db.query(sql, [first_name, last_name, email, hashedPassword], (err, result) => {
+            if (err) {
+                console.error('Error creating user:', err);
 
-                    return res.status(500).json({
-                        message: 'Database error'
-                    });
-                }
-
-                res.status(201).json({
-                    message: 'User registered successfully',
-                    userId: result.insertId
+                return res.status(500).json({
+                    message: 'Database error'
                 });
             }
-        );
 
+            res.status(201).json({
+                message: 'User registered successfully',
+                userId: result.insertId
+            });
+        });
     } catch (error) {
         console.error('Registration error:', error);
 
@@ -89,10 +84,7 @@ const loginUser = (req, res) => {
 
         const user = results[0];
 
-        const passwordMatches = await bcrypt.compare(
-            password,
-            user.password
-        );
+        const passwordMatches = await bcrypt.compare(password, user.password);
 
         if (!passwordMatches) {
             return res.status(401).json({
@@ -130,11 +122,7 @@ const updateUserRole = (req, res) => {
     const adminId = Number(req.user.id);
     const { role } = req.body;
 
-    const allowedRoles = [
-        'customer',
-        'provider',
-        'admin'
-    ];
+    const allowedRoles = ['customer', 'provider', 'admin'];
 
     if (!userId) {
         return res.status(400).json({
@@ -160,34 +148,27 @@ const updateUserRole = (req, res) => {
         WHERE id = ?
     `;
 
-    db.query(
-        sql,
-        [role, userId],
-        (err, result) => {
-            if (err) {
-                console.error(
-                    'Error updating user role:',
-                    err
-                );
+    db.query(sql, [role, userId], (err, result) => {
+        if (err) {
+            console.error('Error updating user role:', err);
 
-                return res.status(500).json({
-                    message: 'Database error'
-                });
-            }
-
-            if (result.affectedRows === 0) {
-                return res.status(404).json({
-                    message: 'User not found'
-                });
-            }
-
-            res.status(200).json({
-                message: 'User role updated successfully',
-                userId,
-                role
+            return res.status(500).json({
+                message: 'Database error'
             });
         }
-    );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            message: 'User role updated successfully',
+            userId,
+            role
+        });
+    });
 };
 
 const deleteUser = (req, res) => {
@@ -212,140 +193,109 @@ const deleteUser = (req, res) => {
         WHERE id = ?
     `;
 
-    db.query(
-        userSql,
-        [userId],
-        (userError, users) => {
-            if (userError) {
-                console.error(
-                    'Error checking user:',
-                    userError
-                );
+    db.query(userSql, [userId], (userError, users) => {
+        if (userError) {
+            console.error('Error checking user:', userError);
 
-                return res.status(500).json({
-                    message: 'Database error'
-                });
-            }
+            return res.status(500).json({
+                message: 'Database error'
+            });
+        }
 
-            if (users.length === 0) {
-                return res.status(404).json({
-                    message: 'User not found'
-                });
-            }
+        if (users.length === 0) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
 
-            const user = users[0];
+        const user = users[0];
 
-            if (user.role === 'provider') {
-                const providerCheckSql = `
+        if (user.role === 'provider') {
+            const providerCheckSql = `
                     SELECT COUNT(*) AS total
                     FROM services
                     WHERE provider_id = ?
                 `;
 
-                db.query(
-                    providerCheckSql,
-                    [userId],
-                    (providerError, results) => {
-                        if (providerError) {
-                            console.error(
-                                'Error checking provider services:',
-                                providerError
-                            );
+            db.query(providerCheckSql, [userId], (providerError, results) => {
+                if (providerError) {
+                    console.error('Error checking provider services:', providerError);
 
-                            return res.status(500).json({
-                                message: 'Database error'
-                            });
-                        }
+                    return res.status(500).json({
+                        message: 'Database error'
+                    });
+                }
 
-                        if (results[0].total > 0) {
-                            return res.status(400).json({
-                                message:
-                                    'Provider cannot be deleted because they have existing services'
-                            });
-                        }
+                if (results[0].total > 0) {
+                    return res.status(400).json({
+                        message: 'Provider cannot be deleted because they have existing services'
+                    });
+                }
 
-                        performDelete();
-                    }
-                );
+                performDelete();
+            });
 
-                return;
-            }
+            return;
+        }
 
-            if (user.role === 'customer') {
-                const customerCheckSql = `
+        if (user.role === 'customer') {
+            const customerCheckSql = `
                     SELECT COUNT(*) AS total
                     FROM bookings
                     WHERE customer_id = ?
                 `;
 
-                db.query(
-                    customerCheckSql,
-                    [userId],
-                    (customerError, results) => {
-                        if (customerError) {
-                            console.error(
-                                'Error checking customer bookings:',
-                                customerError
-                            );
+            db.query(customerCheckSql, [userId], (customerError, results) => {
+                if (customerError) {
+                    console.error('Error checking customer bookings:', customerError);
 
-                            return res.status(500).json({
-                                message: 'Database error'
-                            });
-                        }
+                    return res.status(500).json({
+                        message: 'Database error'
+                    });
+                }
 
-                        if (results[0].total > 0) {
-                            return res.status(400).json({
-                                message:
-                                    'Customer cannot be deleted because they have existing bookings'
-                            });
-                        }
+                if (results[0].total > 0) {
+                    return res.status(400).json({
+                        message: 'Customer cannot be deleted because they have existing bookings'
+                    });
+                }
 
-                        performDelete();
-                    }
-                );
+                performDelete();
+            });
 
-                return;
-            }
+            return;
+        }
 
-            performDelete();
+        performDelete();
 
-
-            function performDelete() {
-                const deleteSql = `
+        function performDelete() {
+            const deleteSql = `
                     DELETE FROM users
                     WHERE id = ?
                 `;
 
-                db.query(
-                    deleteSql,
-                    [userId],
-                    (deleteError, result) => {
-                        if (deleteError) {
-                            console.error(
-                                'Error deleting user:',
-                                deleteError
-                            );
+            db.query(deleteSql, [userId], (deleteError, result) => {
+                if (deleteError) {
+                    console.error('Error deleting user:', deleteError);
 
-                            return res.status(500).json({
-                                message: 'Database error'
-                            });
-                        }
+                    return res.status(500).json({
+                        message: 'Database error'
+                    });
+                }
 
-                        if (result.affectedRows === 0) {
-                            return res.status(404).json({
-                                message: 'User not found'
-                            });
-                        }
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({
+                        message: 'User not found'
+                    });
+                }
 
-                        res.status(200).json({
-                            message: 'User deleted successfully',
-                            userId
-                        });
-                    }
-                );
-            }
+                res.status(200).json({
+                    message: 'User deleted successfully',
+                    userId
+                });
+            });
         }
-    );
+    });
 };
 
 module.exports = {

@@ -21,13 +21,11 @@ const bookingMessage = document.getElementById('bookingMessage');
 
 const logoutBtn = document.getElementById('logoutBtn');
 
-
 const formatDate = (dateString) => {
     const [year, month, day] = dateString.split('-');
 
     return `${day}/${month}/${year}`;
 };
-
 
 const translateStatus = (status) => {
     const statuses = {
@@ -40,27 +38,22 @@ const translateStatus = (status) => {
     return statuses[status] || status;
 };
 
-
 const loadServices = async () => {
     try {
-        const response = await fetch(
-            `${API_URL}/services`
-        );
+        const response = await fetch(`${API_URL}/services`);
 
         const services = await response.json();
 
         servicesList.innerHTML = '';
 
         if (!response.ok) {
-            servicesList.innerHTML =
-                '<p>Δεν ήταν δυνατή η φόρτωση υπηρεσιών.</p>';
+            servicesList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση υπηρεσιών.</p>';
 
             return;
         }
 
         if (services.length === 0) {
-            servicesList.innerHTML =
-                '<p>Δεν υπάρχουν διαθέσιμες υπηρεσίες.</p>';
+            servicesList.innerHTML = '<p>Δεν υπάρχουν διαθέσιμες υπηρεσίες.</p>';
 
             return;
         }
@@ -108,17 +101,12 @@ const loadServices = async () => {
 
             servicesList.appendChild(card);
 
-            const bookingButton =
-                card.querySelector('.book-service-btn');
+            const bookingButton = card.querySelector('.book-service-btn');
 
             bookingButton.addEventListener('click', () => {
-                document.getElementById(
-                    'selectedServiceId'
-                ).value = service.id;
+                document.getElementById('selectedServiceId').value = service.id;
 
-                document.getElementById(
-                    'selectedServiceName'
-                ).textContent = service.name;
+                document.getElementById('selectedServiceName').textContent = service.name;
 
                 bookingDateInput.value = '';
 
@@ -130,10 +118,7 @@ const loadServices = async () => {
 
                 bookingMessage.textContent = '';
 
-                const bookingSection =
-                    document.getElementById(
-                        'booking-section'
-                    );
+                const bookingSection = document.getElementById('booking-section');
 
                 bookingSection.style.display = 'block';
 
@@ -142,44 +127,33 @@ const loadServices = async () => {
                 });
             });
         });
-
     } catch (error) {
-        console.error(
-            'Services loading error:',
-            error
-        );
+        console.error('Services loading error:', error);
 
-        servicesList.innerHTML =
-            '<p>Δεν ήταν δυνατή η φόρτωση υπηρεσιών.</p>';
+        servicesList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση υπηρεσιών.</p>';
     }
 };
 
-
 const loadBookings = async () => {
     try {
-        const response = await fetch(
-            `${API_URL}/bookings/my`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+        const response = await fetch(`${API_URL}/bookings/my`, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-        );
+        });
 
         const bookings = await response.json();
 
         bookingsList.innerHTML = '';
 
         if (!response.ok) {
-            bookingsList.innerHTML =
-                `<p>${bookings.message || 'Δεν ήταν δυνατή η φόρτωση κρατήσεων.'}</p>`;
+            bookingsList.innerHTML = `<p>${bookings.message || 'Δεν ήταν δυνατή η φόρτωση κρατήσεων.'}</p>`;
 
             return;
         }
 
         if (bookings.length === 0) {
-            bookingsList.innerHTML =
-                '<p>Δεν έχεις ακόμη κρατήσεις.</p>';
+            bookingsList.innerHTML = '<p>Δεν έχεις ακόμη κρατήσεις.</p>';
 
             return;
         }
@@ -218,265 +192,190 @@ const loadBookings = async () => {
 
             bookingsList.appendChild(card);
         });
-
     } catch (error) {
-        console.error(
-            'Bookings loading error:',
-            error
-        );
+        console.error('Bookings loading error:', error);
 
-        bookingsList.innerHTML =
-            '<p>Δεν ήταν δυνατή η φόρτωση κρατήσεων.</p>';
+        bookingsList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση κρατήσεων.</p>';
     }
 };
 
+bookingDateInput.addEventListener('change', async () => {
+    const serviceId = Number(document.getElementById('selectedServiceId').value);
 
-bookingDateInput.addEventListener(
-    'change',
-    async () => {
-        const serviceId = Number(
-            document.getElementById(
-                'selectedServiceId'
-            ).value
-        );
+    const selectedDate = bookingDateInput.value;
 
-        const selectedDate =
-            bookingDateInput.value;
-
-        bookingTimeSelect.innerHTML = `
+    bookingTimeSelect.innerHTML = `
             <option value="">
                 Φόρτωση διαθέσιμων ωρών...
             </option>
         `;
 
-        if (!serviceId || !selectedDate) {
-            bookingTimeSelect.innerHTML = `
+    if (!serviceId || !selectedDate) {
+        bookingTimeSelect.innerHTML = `
                 <option value="">
                     Επίλεξε πρώτα ημερομηνία
                 </option>
             `;
 
-            return;
-        }
+        return;
+    }
 
-        try {
-            const response = await fetch(
-                `${API_URL}/bookings/available-slots` +
+    try {
+        const response = await fetch(
+            `${API_URL}/bookings/available-slots` +
                 `?service_id=${serviceId}` +
                 `&date=${selectedDate}`,
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
-                    }
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            );
+            }
+        );
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (!response.ok) {
-                console.error(
-                    'Slots API error:',
-                    data
-                );
+        if (!response.ok) {
+            console.error('Slots API error:', data);
 
-                bookingTimeSelect.innerHTML = `
+            bookingTimeSelect.innerHTML = `
                     <option value="">
                         ${data.message || 'Δεν ήταν δυνατή η φόρτωση'}
                     </option>
                 `;
 
-                return;
-            }
+            return;
+        }
 
-            if (
-                !data.slots ||
-                data.slots.length === 0
-            ) {
-                bookingTimeSelect.innerHTML = `
+        if (!data.slots || data.slots.length === 0) {
+            bookingTimeSelect.innerHTML = `
                     <option value="">
                         Δεν υπάρχουν διαθέσιμες ώρες
                     </option>
                 `;
 
-                return;
-            }
+            return;
+        }
 
-            bookingTimeSelect.innerHTML = `
+        bookingTimeSelect.innerHTML = `
                 <option value="">
                     Επίλεξε ώρα
                 </option>
             `;
 
-            data.slots.forEach((slot) => {
-                const option =
-                    document.createElement('option');
+        data.slots.forEach((slot) => {
+            const option = document.createElement('option');
 
-                option.value = slot;
-                option.textContent = slot;
+            option.value = slot;
+            option.textContent = slot;
 
-                bookingTimeSelect.appendChild(
-                    option
-                );
-            });
+            bookingTimeSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Available slots error:', error);
 
-        } catch (error) {
-            console.error(
-                'Available slots error:',
-                error
-            );
-
-            bookingTimeSelect.innerHTML = `
+        bookingTimeSelect.innerHTML = `
                 <option value="">
                     Σφάλμα φόρτωσης ωρών
                 </option>
             `;
-        }
     }
-);
+});
 
+bookingForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-bookingForm.addEventListener(
-    'submit',
-    async (event) => {
-        event.preventDefault();
+    const serviceId = Number(document.getElementById('selectedServiceId').value);
 
-        const serviceId = Number(
-            document.getElementById(
-                'selectedServiceId'
-            ).value
-        );
+    const bookingDate = bookingDateInput.value;
 
-        const bookingDate =
-            bookingDateInput.value;
+    const startTime = bookingTimeSelect.value;
 
-        const startTime =
-            bookingTimeSelect.value;
+    if (!serviceId || !bookingDate || !startTime) {
+        bookingMessage.textContent = 'Επίλεξε ημερομηνία και διαθέσιμη ώρα.';
 
-        if (
-            !serviceId ||
-            !bookingDate ||
-            !startTime
-        ) {
-            bookingMessage.textContent =
-                'Επίλεξε ημερομηνία και διαθέσιμη ώρα.';
+        return;
+    }
+
+    bookingMessage.textContent = 'Γίνεται δημιουργία της κράτησης...';
+
+    try {
+        const response = await fetch(`${API_URL}/bookings`, {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+
+                Authorization: `Bearer ${token}`
+            },
+
+            body: JSON.stringify({
+                service_id: serviceId,
+                booking_date: bookingDate,
+                start_time: startTime
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            bookingMessage.textContent = data.message || 'Η κράτηση απέτυχε';
 
             return;
         }
 
-        bookingMessage.textContent =
-            'Γίνεται δημιουργία της κράτησης...';
+        bookingMessage.textContent = 'Η κράτηση δημιουργήθηκε επιτυχώς!';
 
-        try {
-            const response = await fetch(
-                `${API_URL}/bookings`,
-                {
-                    method: 'POST',
+        await loadBookings();
 
-                    headers: {
-                        'Content-Type':
-                            'application/json',
+        bookingDateInput.dispatchEvent(new Event('change'));
+    } catch (error) {
+        console.error('Booking error:', error);
 
-                        Authorization:
-                            `Bearer ${token}`
-                    },
-
-                    body: JSON.stringify({
-                        service_id: serviceId,
-                        booking_date: bookingDate,
-                        start_time: startTime
-                    })
-                }
-            );
-
-            const data =
-                await response.json();
-
-            if (!response.ok) {
-                bookingMessage.textContent =
-                    data.message ||
-                    'Η κράτηση απέτυχε';
-
-                return;
-            }
-
-            bookingMessage.textContent =
-                'Η κράτηση δημιουργήθηκε επιτυχώς!';
-
-            await loadBookings();
-
-            bookingDateInput.dispatchEvent(
-                new Event('change')
-            );
-
-        } catch (error) {
-            console.error(
-                'Booking error:',
-                error
-            );
-
-            bookingMessage.textContent =
-                'Δεν ήταν δυνατή η επικοινωνία με τον server.';
-        }
+        bookingMessage.textContent = 'Δεν ήταν δυνατή η επικοινωνία με τον server.';
     }
-);
+});
 
+intentForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-intentForm.addEventListener(
-    'submit',
-    async (event) => {
-        event.preventDefault();
+    const prompt = intentPrompt.value.trim();
 
-        const prompt =
-            intentPrompt.value.trim();
+    if (!prompt) {
+        return;
+    }
 
-        if (!prompt) {
+    intentMessage.textContent = 'Γίνεται ανάλυση του αιτήματός σου...';
+
+    aiResult.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_URL}/intent`, {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+
+                Authorization: `Bearer ${token}`
+            },
+
+            body: JSON.stringify({
+                prompt
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            intentMessage.textContent = data.message || 'Η ανάλυση απέτυχε';
+
             return;
         }
 
-        intentMessage.textContent =
-            'Γίνεται ανάλυση του αιτήματός σου...';
+        intentMessage.textContent = 'Βρέθηκε κατάλληλη υπηρεσία';
 
-        aiResult.innerHTML = '';
+        const service = data.matchedService;
 
-        try {
-            const response = await fetch(
-                `${API_URL}/intent`,
-                {
-                    method: 'POST',
-
-                    headers: {
-                        'Content-Type':
-                            'application/json',
-
-                        Authorization:
-                            `Bearer ${token}`
-                    },
-
-                    body: JSON.stringify({
-                        prompt
-                    })
-                }
-            );
-
-            const data =
-                await response.json();
-
-            if (!response.ok) {
-                intentMessage.textContent =
-                    data.message ||
-                    'Η ανάλυση απέτυχε';
-
-                return;
-            }
-
-            intentMessage.textContent =
-                'Βρέθηκε κατάλληλη υπηρεσία';
-
-            const service =
-                data.matchedService;
-
-            aiResult.innerHTML = `
+        aiResult.innerHTML = `
                 <div class="dashboard-card ai-card">
 
                     <h3>${service.name}</h3>
@@ -508,38 +407,24 @@ intentForm.addEventListener(
 
                     <p>
                         <strong>AI confidence:</strong>
-                        ${Math.round(
-                            data.intent.confidence * 100
-                        )}%
+                        ${Math.round(data.intent.confidence * 100)}%
                     </p>
 
                 </div>
             `;
+    } catch (error) {
+        console.error('AI error:', error);
 
-        } catch (error) {
-            console.error(
-                'AI error:',
-                error
-            );
-
-            intentMessage.textContent =
-                'Δεν ήταν δυνατή η επικοινωνία με το AI';
-        }
+        intentMessage.textContent = 'Δεν ήταν δυνατή η επικοινωνία με το AI';
     }
-);
+});
 
+logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
 
-logoutBtn.addEventListener(
-    'click',
-    () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-
-        window.location.href =
-            'login.html';
-    }
-);
-
+    window.location.href = 'login.html';
+});
 
 loadServices();
 loadBookings();

@@ -22,19 +22,9 @@ router.get(
     getAvailableSlots
 );
 
-router.get(
-    '/',
-    authenticateToken,
-    authorizeRoles('admin'),
-    getAllBookings
-);
+router.get('/', authenticateToken, authorizeRoles('admin'), getAllBookings);
 
-router.get(
-    '/my',
-    authenticateToken,
-    authorizeRoles('customer', 'admin'),
-    getMyBookings
-);
+router.get('/my', authenticateToken, authorizeRoles('customer', 'admin'), getMyBookings);
 
 router.get(
     '/provider',
@@ -43,12 +33,7 @@ router.get(
     getProviderBookings
 );
 
-router.post(
-    '/',
-    authenticateToken,
-    authorizeRoles('customer', 'admin'),
-    createBooking
-);
+router.post('/', authenticateToken, authorizeRoles('customer', 'admin'), createBooking);
 
 router.patch(
     '/:id/status',
@@ -57,11 +42,6 @@ router.patch(
     updateBookingStatus
 );
 
-router.patch(
-    '/:id/cancel',
-    authenticateToken,
-    authorizeRoles('customer', 'admin'),
-    cancelBooking
-);
+router.patch('/:id/cancel', authenticateToken, authorizeRoles('customer', 'admin'), cancelBooking);
 
 module.exports = router;

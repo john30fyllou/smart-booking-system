@@ -1,180 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="el">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Πελάτης - Smart Booking System</title>
 
-    <title>Πελάτης - Smart Booking System</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
 
-    <link rel="stylesheet" href="css/style.css">
-</head>
+    <body>
+        <header>
+            <div class="container">
+                <h1>Smart Booking System</h1>
 
-<body>
+                <nav>
+                    <a href="customer.html">Αρχική</a>
+                    <a href="#services">Υπηρεσίες</a>
+                    <a href="#my-bookings">Τα ραντεβού μου</a>
 
-    <header>
-        <div class="container">
-            <h1>Smart Booking System</h1>
-
-            <nav>
-                <a href="customer.html">Αρχική</a>
-                <a href="#services">Υπηρεσίες</a>
-                <a href="#my-bookings">Τα ραντεβού μου</a>
-
-                <button
-                    id="logoutBtn"
-                    class="nav-button"
-                >
-                    Αποσύνδεση
-                </button>
-            </nav>
-        </div>
-    </header>
-
-    <main class="dashboard">
-
-        <section class="container dashboard-section">
-            <h2>Καλώς ήρθες</h2>
-
-            <p>
-                Βρες την υπηρεσία που χρειάζεσαι ή περιέγραψέ την
-                με φυσική γλώσσα.
-            </p>
-        </section>
-
-        <section class="container dashboard-section">
-            <h2>Έξυπνη αναζήτηση</h2>
-
-            <form
-                id="intentForm"
-                class="intent-form"
-            >
-                <input
-                    type="text"
-                    id="intentPrompt"
-                    placeholder="π.χ. Θέλω κούρεμα και styling"
-                    required
-                >
-
-                <button
-                    type="submit"
-                    class="btn"
-                >
-                    Αναζήτηση
-                </button>
-            </form>
-
-            <p
-                id="intentMessage"
-                class="message"
-            ></p>
-
-            <div id="aiResult"></div>
-        </section>
-
-        <section
-            id="services"
-            class="container dashboard-section"
-        >
-            <h2>Διαθέσιμες υπηρεσίες</h2>
-
-            <div
-                id="servicesList"
-                class="cards-grid"
-            >
-                <p>Φόρτωση υπηρεσιών...</p>
+                    <button id="logoutBtn" class="nav-button">Αποσύνδεση</button>
+                </nav>
             </div>
-        </section>
+        </header>
 
-        <section
-            id="booking-section"
-            class="container dashboard-section booking-section"
-            style="display: none;"
-        >
-            <h2>Νέα κράτηση</h2>
+        <main class="dashboard">
+            <section class="container dashboard-section">
+                <h2>Καλώς ήρθες</h2>
 
-            <div class="dashboard-card">
+                <p>Βρες την υπηρεσία που χρειάζεσαι ή περιέγραψέ την με φυσική γλώσσα.</p>
+            </section>
 
-                <h3 id="selectedServiceName">
-                    Επιλεγμένη υπηρεσία
-                </h3>
+            <section class="container dashboard-section">
+                <h2>Έξυπνη αναζήτηση</h2>
 
-                <form id="bookingForm">
-
+                <form id="intentForm" class="intent-form">
                     <input
-                        type="hidden"
-                        id="selectedServiceId"
-                    >
+                        type="text"
+                        id="intentPrompt"
+                        placeholder="π.χ. Θέλω κούρεμα και styling"
+                        required
+                    />
 
-                    <div class="form-group">
-                        <label for="bookingDate">
-                            Ημερομηνία
-                        </label>
-
-                        <input
-                            type="date"
-                            id="bookingDate"
-                            required
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="bookingTime">
-                            Διαθέσιμη ώρα
-                        </label>
-
-                        <select
-                            id="bookingTime"
-                            required
-                        >
-                            <option value="">
-                                Επίλεξε πρώτα ημερομηνία
-                            </option>
-                        </select>
-                    </div>
-
-                    <button
-                        type="submit"
-                        class="btn"
-                    >
-                        Επιβεβαίωση κράτησης
-                    </button>
-
+                    <button type="submit" class="btn">Αναζήτηση</button>
                 </form>
 
-                <p
-                    id="bookingMessage"
-                    class="message"
-                ></p>
+                <p id="intentMessage" class="message"></p>
 
-            </div>
-        </section>
+                <div id="aiResult"></div>
+            </section>
 
-        <section
-            id="my-bookings"
-            class="container dashboard-section"
-        >
-            <h2>Τα ραντεβού μου</h2>
+            <section id="services" class="container dashboard-section">
+                <h2>Διαθέσιμες υπηρεσίες</h2>
 
-            <div
-                id="bookingsList"
-                class="cards-grid"
+                <div id="servicesList" class="cards-grid">
+                    <p>Φόρτωση υπηρεσιών...</p>
+                </div>
+            </section>
+
+            <section
+                id="booking-section"
+                class="container dashboard-section booking-section"
+                style="display: none"
             >
-                <p>Φόρτωση κρατήσεων...</p>
-            </div>
-        </section>
+                <h2>Νέα κράτηση</h2>
 
-    </main>
+                <div class="dashboard-card">
+                    <h3 id="selectedServiceName">Επιλεγμένη υπηρεσία</h3>
 
-    <footer>
-        <p>
-            Smart Booking System
-        </p>
-    </footer>
+                    <form id="bookingForm">
+                        <input type="hidden" id="selectedServiceId" />
 
-    <script src="js/api.js"></script>
-    <script src="js/customer.js"></script>
+                        <div class="form-group">
+                            <label for="bookingDate"> Ημερομηνία </label>
 
-</body>
+                            <input type="date" id="bookingDate" required />
+                        </div>
 
+                        <div class="form-group">
+                            <label for="bookingTime"> Διαθέσιμη ώρα </label>
+
+                            <select id="bookingTime" required>
+                                <option value="">Επίλεξε πρώτα ημερομηνία</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn">Επιβεβαίωση κράτησης</button>
+                    </form>
+
+                    <p id="bookingMessage" class="message"></p>
+                </div>
+            </section>
+
+            <section id="my-bookings" class="container dashboard-section">
+                <h2>Τα ραντεβού μου</h2>
+
+                <div id="bookingsList" class="cards-grid">
+                    <p>Φόρτωση κρατήσεων...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Smart Booking System</p>
+        </footer>
+
+        <script src="js/api.js"></script>
+        <script src="js/customer.js"></script>
+    </body>
 </html>

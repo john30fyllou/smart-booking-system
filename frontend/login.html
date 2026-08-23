@@ -1,81 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="el">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Σύνδεση - Smart Booking System</title>
 
-    <title>Σύνδεση - Smart Booking System</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
 
-    <link rel="stylesheet" href="css/style.css">
-</head>
+    <body>
+        <header>
+            <div class="container">
+                <h1>Smart Booking System</h1>
 
-<body>
+                <nav>
+                    <a href="index.html">Αρχική</a>
+                    <a href="login.html">Σύνδεση</a>
+                    <a href="register.html">Εγγραφή</a>
+                </nav>
+            </div>
+        </header>
 
-    <header>
-        <div class="container">
-            <h1>Smart Booking System</h1>
+        <main class="auth-page">
+            <div class="auth-card">
+                <h2>Σύνδεση</h2>
 
-            <nav>
-                <a href="index.html">Αρχική</a>
-                <a href="login.html">Σύνδεση</a>
-                <a href="register.html">Εγγραφή</a>
-            </nav>
-        </div>
-    </header>
+                <p class="auth-subtitle">Συνδέσου στον λογαριασμό σου</p>
 
-    <main class="auth-page">
-        <div class="auth-card">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
 
-            <h2>Σύνδεση</h2>
+                        <input type="email" id="email" required placeholder="example@email.com" />
+                    </div>
 
-            <p class="auth-subtitle">
-                Συνδέσου στον λογαριασμό σου
-            </p>
+                    <div class="form-group">
+                        <label for="password">Κωδικός πρόσβασης</label>
 
-            <form id="loginForm">
+                        <input type="password" id="password" required placeholder="••••••••" />
+                    </div>
 
-                <div class="form-group">
-                    <label for="email">Email</label>
+                    <button class="btn auth-btn" type="submit">Σύνδεση</button>
+                </form>
 
-                    <input
-                        type="email"
-                        id="email"
-                        required
-                        placeholder="example@email.com"
-                    >
-                </div>
+                <p id="loginMessage" class="message"></p>
 
-                <div class="form-group">
-                    <label for="password">Κωδικός πρόσβασης</label>
+                <p class="auth-footer">
+                    Δεν έχεις λογαριασμό;
+                    <a href="register.html">Δημιούργησε έναν</a>
+                </p>
+            </div>
+        </main>
 
-                    <input
-                        type="password"
-                        id="password"
-                        required
-                        placeholder="••••••••"
-                    >
-                </div>
-
-                <button class="btn auth-btn" type="submit">
-                    Σύνδεση
-                </button>
-
-            </form>
-
-            <p id="loginMessage" class="message"></p>
-
-            <p class="auth-footer">
-                Δεν έχεις λογαριασμό;
-                <a href="register.html">Δημιούργησε έναν</a>
-            </p>
-
-        </div>
-    </main>
-
-    <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
-
-</body>
-
+        <script src="js/api.js"></script>
+        <script src="js/auth.js"></script>
+    </body>
 </html>

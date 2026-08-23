@@ -13,25 +13,10 @@ const {
 
 router.get('/', getAllServices);
 
-router.post(
-    '/',
-    authenticateToken,
-    authorizeRoles('provider', 'admin'),
-    createService
-);
+router.post('/', authenticateToken, authorizeRoles('provider', 'admin'), createService);
 
-router.put(
-    '/:id',
-    authenticateToken,
-    authorizeRoles('provider', 'admin'),
-    updateService
-);
+router.put('/:id', authenticateToken, authorizeRoles('provider', 'admin'), updateService);
 
-router.delete(
-    '/:id',
-    authenticateToken,
-    authorizeRoles('provider', 'admin'),
-    deleteService
-);
+router.delete('/:id', authenticateToken, authorizeRoles('provider', 'admin'), deleteService);
 
 module.exports = router;

@@ -1,94 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="el">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin - Smart Booking System</title>
 
-    <title>Admin - Smart Booking System</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
 
-    <link rel="stylesheet" href="css/style.css">
-</head>
+    <body>
+        <header>
+            <div class="container">
+                <h1>Smart Booking System</h1>
 
-<body>
+                <nav>
+                    <a href="admin.html">Αρχική</a>
+                    <a href="#users">Χρήστες</a>
+                    <a href="#bookings">Κρατήσεις</a>
+                    <a href="#services">Υπηρεσίες</a>
 
-    <header>
-        <div class="container">
-
-            <h1>Smart Booking System</h1>
-
-            <nav>
-                <a href="admin.html">Αρχική</a>
-                <a href="#users">Χρήστες</a>
-                <a href="#bookings">Κρατήσεις</a>
-                <a href="#services">Υπηρεσίες</a>
-
-                <button id="logoutBtn" class="nav-button">
-                    Αποσύνδεση
-                </button>
-            </nav>
-
-        </div>
-    </header>
-
-
-    <main class="dashboard">
-
-        <section class="container dashboard-section">
-
-            <h2>Πίνακας Διαχειριστή</h2>
-
-            <p>
-                Συνολική εποπτεία χρηστών, κρατήσεων
-                και υπηρεσιών του συστήματος.
-            </p>
-
-        </section>
-
-
-        <section id="users" class="container dashboard-section">
-
-            <h2>Χρήστες</h2>
-
-            <div id="usersList" class="cards-grid">
-                <p>Φόρτωση χρηστών...</p>
+                    <button id="logoutBtn" class="nav-button">Αποσύνδεση</button>
+                </nav>
             </div>
+        </header>
 
-        </section>
+        <main class="dashboard">
+            <section class="container dashboard-section">
+                <h2>Πίνακας Διαχειριστή</h2>
 
+                <p>Συνολική εποπτεία χρηστών, κρατήσεων και υπηρεσιών του συστήματος.</p>
+            </section>
 
-        <section id="bookings" class="container dashboard-section">
+            <section id="users" class="container dashboard-section">
+                <h2>Χρήστες</h2>
 
-            <h2>Όλες οι κρατήσεις</h2>
+                <div id="usersList" class="cards-grid">
+                    <p>Φόρτωση χρηστών...</p>
+                </div>
+            </section>
 
-            <div id="adminBookingsList" class="cards-grid">
-                <p>Φόρτωση κρατήσεων...</p>
-            </div>
+            <section id="bookings" class="container dashboard-section">
+                <h2>Όλες οι κρατήσεις</h2>
 
-        </section>
+                <div id="adminBookingsList" class="cards-grid">
+                    <p>Φόρτωση κρατήσεων...</p>
+                </div>
+            </section>
 
+            <section id="services" class="container dashboard-section">
+                <h2>Όλες οι υπηρεσίες</h2>
 
-        <section id="services" class="container dashboard-section">
+                <div id="adminServicesList" class="cards-grid">
+                    <p>Φόρτωση υπηρεσιών...</p>
+                </div>
+            </section>
+        </main>
 
-            <h2>Όλες οι υπηρεσίες</h2>
+        <footer>
+            <p>Smart Booking System</p>
+        </footer>
 
-            <div id="adminServicesList" class="cards-grid">
-                <p>Φόρτωση υπηρεσιών...</p>
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <footer>
-        <p>Smart Booking System</p>
-    </footer>
-
-
-    <script src="js/api.js"></script>
-    <script src="js/admin.js"></script>
-
-</body>
-
+        <script src="js/api.js"></script>
+        <script src="js/admin.js"></script>
+    </body>
 </html>

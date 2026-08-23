@@ -31,11 +31,7 @@ const getAvailability = (req, res) => {
 const createAvailability = (req, res) => {
     const providerId = req.user.id;
 
-    const {
-        available_date,
-        start_time,
-        end_time
-    } = req.body;
+    const { available_date, start_time, end_time } = req.body;
 
     if (!available_date || !start_time || !end_time) {
         return res.status(400).json({
@@ -55,34 +51,26 @@ const createAvailability = (req, res) => {
         VALUES (?, ?, ?, ?)
     `;
 
-    db.query(
-        sql,
-        [providerId, available_date, start_time, end_time],
-        (err, result) => {
-            if (err) {
-                console.error('Error creating availability:', err);
+    db.query(sql, [providerId, available_date, start_time, end_time], (err, result) => {
+        if (err) {
+            console.error('Error creating availability:', err);
 
-                return res.status(500).json({
-                    message: 'Database error'
-                });
-            }
-
-            res.status(201).json({
-                message: 'Availability created successfully',
-                availabilityId: result.insertId
+            return res.status(500).json({
+                message: 'Database error'
             });
         }
-    );
+
+        res.status(201).json({
+            message: 'Availability created successfully',
+            availabilityId: result.insertId
+        });
+    });
 };
 
 const updateAvailability = (req, res) => {
     const availabilityId = req.params.id;
 
-    const {
-        available_date,
-        start_time,
-        end_time
-    } = req.body;
+    const { available_date, start_time, end_time } = req.body;
 
     if (!available_date || !start_time || !end_time) {
         return res.status(400).json({
@@ -119,10 +107,7 @@ const updateAvailability = (req, res) => {
 
         const availability = results[0];
 
-        if (
-            req.user.role === 'provider' &&
-            availability.provider_id !== req.user.id
-        ) {
+        if (req.user.role === 'provider' && availability.provider_id !== req.user.id) {
             return res.status(403).json({
                 message: 'Access denied'
             });
@@ -137,32 +122,20 @@ const updateAvailability = (req, res) => {
             WHERE id = ?
         `;
 
-        db.query(
-            updateSql,
-            [
-                available_date,
-                start_time,
-                end_time,
-                availabilityId
-            ],
-            (err) => {
-                if (err) {
-                    console.error(
-                        'Error updating availability:',
-                        err
-                    );
+        db.query(updateSql, [available_date, start_time, end_time, availabilityId], (err) => {
+            if (err) {
+                console.error('Error updating availability:', err);
 
-                    return res.status(500).json({
-                        message: 'Database error'
-                    });
-                }
-
-                res.status(200).json({
-                    message: 'Availability updated successfully',
-                    availabilityId: Number(availabilityId)
+                return res.status(500).json({
+                    message: 'Database error'
                 });
             }
-        );
+
+            res.status(200).json({
+                message: 'Availability updated successfully',
+                availabilityId: Number(availabilityId)
+            });
+        });
     });
 };
 
@@ -192,10 +165,7 @@ const deleteAvailability = (req, res) => {
 
         const availability = results[0];
 
-        if (
-            req.user.role === 'provider' &&
-            availability.provider_id !== req.user.id
-        ) {
+        if (req.user.role === 'provider' && availability.provider_id !== req.user.id) {
             return res.status(403).json({
                 message: 'Access denied'
             });

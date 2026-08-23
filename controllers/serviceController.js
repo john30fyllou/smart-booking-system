@@ -37,13 +37,7 @@ const getAllServices = (req, res) => {
 const createService = (req, res) => {
     const providerId = req.user.id;
 
-    const {
-        category_id,
-        name,
-        description,
-        duration_minutes,
-        price
-    } = req.body;
+    const { category_id, name, description, duration_minutes, price } = req.body;
 
     if (!category_id || !name || !duration_minutes || price === undefined) {
         return res.status(400).json({
@@ -59,14 +53,7 @@ const createService = (req, res) => {
 
     db.query(
         sql,
-        [
-            providerId,
-            category_id,
-            name,
-            description || null,
-            duration_minutes,
-            price
-        ],
+        [providerId, category_id, name, description || null, duration_minutes, price],
         (err, result) => {
             if (err) {
                 console.error('Error creating service:', err);
@@ -87,13 +74,7 @@ const createService = (req, res) => {
 const updateService = (req, res) => {
     const serviceId = req.params.id;
 
-    const {
-        category_id,
-        name,
-        description,
-        duration_minutes,
-        price
-    } = req.body;
+    const { category_id, name, description, duration_minutes, price } = req.body;
 
     if (!category_id || !name || !duration_minutes || !price) {
         return res.status(400).json({
@@ -124,10 +105,7 @@ const updateService = (req, res) => {
 
         const service = results[0];
 
-        if (
-            req.user.role === 'provider' &&
-            service.provider_id !== req.user.id
-        ) {
+        if (req.user.role === 'provider' && service.provider_id !== req.user.id) {
             return res.status(403).json({
                 message: 'Access denied'
             });
@@ -146,14 +124,7 @@ const updateService = (req, res) => {
 
         db.query(
             updateSql,
-            [
-                category_id,
-                name,
-                description || null,
-                duration_minutes,
-                price,
-                serviceId
-            ],
+            [category_id, name, description || null, duration_minutes, price, serviceId],
             (err) => {
                 if (err) {
                     console.error('Error updating service:', err);
@@ -198,10 +169,7 @@ const deleteService = (req, res) => {
 
         const service = results[0];
 
-        if (
-            req.user.role === 'provider' &&
-            service.provider_id !== req.user.id
-        ) {
+        if (req.user.role === 'provider' && service.provider_id !== req.user.id) {
             return res.status(403).json({
                 message: 'Access denied'
             });
@@ -214,57 +182,41 @@ const deleteService = (req, res) => {
             LIMIT 1
         `;
 
-        db.query(
-            bookingCheckSql,
-            [serviceId],
-            (err, bookingResults) => {
+        db.query(bookingCheckSql, [serviceId], (err, bookingResults) => {
+            if (err) {
+                console.error('Error checking service bookings:', err);
+
+                return res.status(500).json({
+                    message: 'Database error'
+                });
+            }
+
+            if (bookingResults.length > 0) {
+                return res.status(409).json({
+                    message: 'Service cannot be deleted because it has existing bookings'
+                });
+            }
+
+            const deleteSql = `
+                    DELETE FROM services
+                    WHERE id = ?
+                `;
+
+            db.query(deleteSql, [serviceId], (err) => {
                 if (err) {
-                    console.error(
-                        'Error checking service bookings:',
-                        err
-                    );
+                    console.error('Error deleting service:', err);
 
                     return res.status(500).json({
                         message: 'Database error'
                     });
                 }
 
-                if (bookingResults.length > 0) {
-                    return res.status(409).json({
-                        message:
-                            'Service cannot be deleted because it has existing bookings'
-                    });
-                }
-
-                const deleteSql = `
-                    DELETE FROM services
-                    WHERE id = ?
-                `;
-
-                db.query(
-                    deleteSql,
-                    [serviceId],
-                    (err) => {
-                        if (err) {
-                            console.error(
-                                'Error deleting service:',
-                                err
-                            );
-
-                            return res.status(500).json({
-                                message: 'Database error'
-                            });
-                        }
-
-                        res.status(200).json({
-                            message:
-                                'Service deleted successfully',
-                            serviceId: Number(serviceId)
-                        });
-                    }
-                );
-            }
-        );
+                res.status(200).json({
+                    message: 'Service deleted successfully',
+                    serviceId: Number(serviceId)
+                });
+            });
+        });
     });
 };
 

@@ -5,15 +5,8 @@ const authorizeRoles = require('../middleware/roleMiddleware');
 
 const router = express.Router();
 
-const {
-    analyzeIntent
-} = require('../controllers/intentController');
+const { analyzeIntent } = require('../controllers/intentController');
 
-router.post(
-    '/',
-    authenticateToken,
-    authorizeRoles('customer', 'admin'),
-    analyzeIntent
-);
+router.post('/', authenticateToken, authorizeRoles('customer', 'admin'), analyzeIntent);
 
 module.exports = router;

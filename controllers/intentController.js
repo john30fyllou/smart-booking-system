@@ -100,10 +100,7 @@ Return:
                                 }
                             },
 
-                            required: [
-                                'serviceId',
-                                'confidence'
-                            ]
+                            required: ['serviceId', 'confidence']
                         }
                     }
                 });
@@ -115,9 +112,7 @@ Return:
                 const confidence = Number(aiResult.confidence);
 
                 // 4. Make sure Gemini selected a real service
-                const matchedService = services.find(
-                    (service) => service.id === serviceId
-                );
+                const matchedService = services.find((service) => service.id === serviceId);
 
                 if (!matchedService) {
                     return res.status(500).json({
@@ -149,10 +144,7 @@ Return:
                     ],
                     (err, result) => {
                         if (err) {
-                            console.error(
-                                'Error saving intent log:',
-                                err
-                            );
+                            console.error('Error saving intent log:', err);
 
                             return res.status(500).json({
                                 message: 'Database error'
@@ -166,11 +158,9 @@ Return:
                             intentLogId: result.insertId,
 
                             intent: {
-                                category:
-                                    matchedService.category_name,
+                                category: matchedService.category_name,
 
-                                service:
-                                    matchedService.name,
+                                service: matchedService.name,
 
                                 confidence
                             },
@@ -178,25 +168,19 @@ Return:
                             matchedService: {
                                 id: matchedService.id,
                                 name: matchedService.name,
-                                description:
-                                    matchedService.description,
-                                durationMinutes:
-                                    matchedService.duration_minutes,
+                                description: matchedService.description,
+                                durationMinutes: matchedService.duration_minutes,
                                 price: matchedService.price,
 
                                 provider: {
-                                    id:
-                                        matchedService.provider_id,
-                                    firstName:
-                                        matchedService.provider_first_name,
-                                    lastName:
-                                        matchedService.provider_last_name
+                                    id: matchedService.provider_id,
+                                    firstName: matchedService.provider_first_name,
+                                    lastName: matchedService.provider_last_name
                                 }
                             }
                         });
                     }
                 );
-
             } catch (error) {
                 console.error('Gemini error:', error);
 
@@ -205,7 +189,6 @@ Return:
                 });
             }
         });
-
     } catch (error) {
         console.error('Intent analysis error:', error);
 

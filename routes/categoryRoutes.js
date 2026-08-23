@@ -4,17 +4,9 @@ const authorizeRoles = require('../middleware/roleMiddleware');
 
 const router = express.Router();
 
-const {
-    getAllCategories,
-    createCategory
-} = require('../controllers/categoryController');
+const { getAllCategories, createCategory } = require('../controllers/categoryController');
 
 router.get('/', getAllCategories);
 
-router.post(
-    '/',
-    authenticateToken,
-    authorizeRoles('admin'),
-    createCategory
-);
+router.post('/', authenticateToken, authorizeRoles('admin'), createCategory);
 module.exports = router;
