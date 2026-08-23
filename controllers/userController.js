@@ -125,8 +125,233 @@ const loginUser = (req, res) => {
     });
 };
 
+const updateUserRole = (req, res) => {
+    const userId = Number(req.params.id);
+    const adminId = Number(req.user.id);
+    const { role } = req.body;
+
+    const allowedRoles = [
+        'customer',
+        'provider',
+        'admin'
+    ];
+
+    if (!userId) {
+        return res.status(400).json({
+            message: 'Invalid user id'
+        });
+    }
+
+    if (!allowedRoles.includes(role)) {
+        return res.status(400).json({
+            message: 'Invalid role'
+        });
+    }
+
+    if (userId === adminId) {
+        return res.status(400).json({
+            message: 'You cannot change your own role'
+        });
+    }
+
+    const sql = `
+        UPDATE users
+        SET role = ?
+        WHERE id = ?
+    `;
+
+    db.query(
+        sql,
+        [role, userId],
+        (err, result) => {
+            if (err) {
+                console.error(
+                    'Error updating user role:',
+                    err
+                );
+
+                return res.status(500).json({
+                    message: 'Database error'
+                });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    message: 'User not found'
+                });
+            }
+
+            res.status(200).json({
+                message: 'User role updated successfully',
+                userId,
+                role
+            });
+        }
+    );
+};
+
+const deleteUser = (req, res) => {
+    const userId = Number(req.params.id);
+    const adminId = Number(req.user.id);
+
+    if (!userId) {
+        return res.status(400).json({
+            message: 'Invalid user id'
+        });
+    }
+
+    if (userId === adminId) {
+        return res.status(400).json({
+            message: 'You cannot delete your own account'
+        });
+    }
+
+    const userSql = `
+        SELECT id, role
+        FROM users
+        WHERE id = ?
+    `;
+
+    db.query(
+        userSql,
+        [userId],
+        (userError, users) => {
+            if (userError) {
+                console.error(
+                    'Error checking user:',
+                    userError
+                );
+
+                return res.status(500).json({
+                    message: 'Database error'
+                });
+            }
+
+            if (users.length === 0) {
+                return res.status(404).json({
+                    message: 'User not found'
+                });
+            }
+
+            const user = users[0];
+
+            if (user.role === 'provider') {
+                const providerCheckSql = `
+                    SELECT COUNT(*) AS total
+                    FROM services
+                    WHERE provider_id = ?
+                `;
+
+                db.query(
+                    providerCheckSql,
+                    [userId],
+                    (providerError, results) => {
+                        if (providerError) {
+                            console.error(
+                                'Error checking provider services:',
+                                providerError
+                            );
+
+                            return res.status(500).json({
+                                message: 'Database error'
+                            });
+                        }
+
+                        if (results[0].total > 0) {
+                            return res.status(400).json({
+                                message:
+                                    'Provider cannot be deleted because they have existing services'
+                            });
+                        }
+
+                        performDelete();
+                    }
+                );
+
+                return;
+            }
+
+            if (user.role === 'customer') {
+                const customerCheckSql = `
+                    SELECT COUNT(*) AS total
+                    FROM bookings
+                    WHERE customer_id = ?
+                `;
+
+                db.query(
+                    customerCheckSql,
+                    [userId],
+                    (customerError, results) => {
+                        if (customerError) {
+                            console.error(
+                                'Error checking customer bookings:',
+                                customerError
+                            );
+
+                            return res.status(500).json({
+                                message: 'Database error'
+                            });
+                        }
+
+                        if (results[0].total > 0) {
+                            return res.status(400).json({
+                                message:
+                                    'Customer cannot be deleted because they have existing bookings'
+                            });
+                        }
+
+                        performDelete();
+                    }
+                );
+
+                return;
+            }
+
+            performDelete();
+
+
+            function performDelete() {
+                const deleteSql = `
+                    DELETE FROM users
+                    WHERE id = ?
+                `;
+
+                db.query(
+                    deleteSql,
+                    [userId],
+                    (deleteError, result) => {
+                        if (deleteError) {
+                            console.error(
+                                'Error deleting user:',
+                                deleteError
+                            );
+
+                            return res.status(500).json({
+                                message: 'Database error'
+                            });
+                        }
+
+                        if (result.affectedRows === 0) {
+                            return res.status(404).json({
+                                message: 'User not found'
+                            });
+                        }
+
+                        res.status(200).json({
+                            message: 'User deleted successfully',
+                            userId
+                        });
+                    }
+                );
+            }
+        }
+    );
+};
+
 module.exports = {
     getAllUsers,
     registerUser,
-    loginUser
+    loginUser,
+    updateUserRole,
+    deleteUser
 };

@@ -2,21 +2,24 @@ const db = require('../db');
 
 const getAllServices = (req, res) => {
     const sql = `
-        SELECT
-            services.id,
-            services.provider_id,
-            services.name,
-            services.description,
-            services.duration_minutes,
-            services.price,
-            categories.name AS category_name,
-            users.first_name AS provider_first_name,
-            users.last_name AS provider_last_name
-        FROM services
-        JOIN categories ON services.category_id = categories.id
-        JOIN users ON services.provider_id = users.id
-        ORDER BY services.id
-    `;
+    SELECT
+        services.id,
+        services.provider_id,
+        services.category_id,
+        services.name,
+        services.description,
+        services.duration_minutes,
+        services.price,
+        categories.name AS category_name,
+        users.first_name AS provider_first_name,
+        users.last_name AS provider_last_name
+    FROM services
+    JOIN categories
+        ON services.category_id = categories.id
+    JOIN users
+        ON services.provider_id = users.id
+    ORDER BY services.id
+`;
 
     db.query(sql, (err, results) => {
         if (err) {
