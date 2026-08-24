@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="el">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Εγγραφή - Smart Booking System</title>
+
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+
+    <body>
+        <header>
+            <div class="container">
+                <h1>Smart Booking System</h1>
+
+                <nav>
+                    <a href="index.html">Αρχική</a>
+                    <a href="login.html">Σύνδεση</a>
+                    <a href="register.html">Εγγραφή</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="auth-page">
+            <div class="auth-card">
+                <h2>Δημιουργία λογαριασμού</h2>
+
+                <p class="auth-subtitle">
+                    Επίλεξε τον τύπο λογαριασμού που θέλεις να δημιουργήσεις
+                </p>
+
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="firstName"> Όνομα </label>
+
+                        <input type="text" id="firstName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName"> Επώνυμο </label>
+
+                        <input type="text" id="lastName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email"> Email </label>
+
+                        <input type="email" id="email" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password"> Κωδικός πρόσβασης </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            minlength="8"
+                            pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
+                            title="Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες και να περιέχει τουλάχιστον ένα λατινικό γράμμα (A-Z) και έναν αριθμό (0-9)."
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword"> Επιβεβαίωση κωδικού </label>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            minlength="8"
+                            pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
+                            title="Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες και να περιέχει τουλάχιστον ένα γράμμα και έναν αριθμό."
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerRole"> Τύπος λογαριασμού </label>
+
+                        <select id="registerRole" required>
+                            <option value="customer">Πελάτης</option>
+
+                            <option value="provider">Πάροχος υπηρεσιών</option>
+                        </select>
+                    </div>
+
+                    <div id="providerInfo" class="provider-info" style="display: none">
+                        <p>
+                            Οι λογαριασμοί παρόχων χρειάζονται έγκριση από διαχειριστή πριν
+                            ενεργοποιηθούν.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn auth-btn">Εγγραφή</button>
+                </form>
+
+                <p id="registerMessage" class="message"></p>
+
+                <p class="auth-footer">
+                    Έχεις ήδη λογαριασμό;
+                    <a href="login.html"> Σύνδεση </a>
+                </p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Smart Booking System</p>
+        </footer>
+
+        <script src="js/api.js"></script>
+        <script src="js/register.js"></script>
+    </body>
+</html>

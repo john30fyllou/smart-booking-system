@@ -6,16 +6,12 @@ if (!token || role !== 'admin') {
 }
 
 const usersList = document.getElementById('usersList');
-
 const adminBookingsList = document.getElementById('adminBookingsList');
-
 const adminServicesList = document.getElementById('adminServicesList');
-
 const logoutBtn = document.getElementById('logoutBtn');
 
 const formatDate = (dateString) => {
     const [year, month, day] = dateString.split('-');
-
     return `${day}/${month}/${year}`;
 };
 
@@ -38,6 +34,16 @@ const translateRole = (role) => {
     };
 
     return roles[role] || role;
+};
+
+const translateApprovalStatus = (status) => {
+    const statuses = {
+        pending: 'Σε αναμονή',
+        approved: 'Εγκεκριμένος',
+        rejected: 'Απορρίφθηκε'
+    };
+
+    return statuses[status] || status;
 };
 
 const loadUsers = async () => {
@@ -90,6 +96,17 @@ const loadUsers = async () => {
                 </p>
 
                 ${
+                    user.role === 'provider'
+                        ? `
+                            <p>
+                                <strong>Κατάσταση έγκρισης:</strong>
+                                ${translateApprovalStatus(user.approval_status)}
+                            </p>
+                        `
+                        : ''
+                }
+
+                ${
                     user.role !== 'admin'
                         ? `
                             <div class="form-group">
@@ -115,9 +132,7 @@ const loadUsers = async () => {
                                         Πάροχος
                                     </option>
 
-                                    <option
-                                        value="admin"
-                                    >
+                                    <option value="admin">
                                         Διαχειριστής
                                     </option>
                                 </select>
@@ -138,6 +153,30 @@ const loadUsers = async () => {
                                     class="btn delete-user-btn"
                                 >
                                     Διαγραφή χρήστη
+                                </button>
+
+                            </div>
+                        `
+                        : ''
+                }
+
+                ${
+                    user.role === 'provider' && user.approval_status === 'pending'
+                        ? `
+                            <div class="booking-actions">
+
+                                <button
+                                    type="button"
+                                    class="btn approve-provider-btn"
+                                >
+                                    Έγκριση
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btn reject-provider-btn"
+                                >
+                                    Απόρριψη
                                 </button>
 
                             </div>
@@ -223,6 +262,70 @@ const loadUsers = async () => {
 
                         alert('Δεν ήταν δυνατή η επικοινωνία με τον server.');
                     }
+                });
+            }
+
+            const approveProviderButton = card.querySelector('.approve-provider-btn');
+
+            const rejectProviderButton = card.querySelector('.reject-provider-btn');
+
+            const updateProviderApproval = async (approvalStatus) => {
+                try {
+                    const response = await fetch(`${API_URL}/users/${user.id}/approval`, {
+                        method: 'PATCH',
+
+                        headers: {
+                            'Content-Type': 'application/json',
+
+                            Authorization: `Bearer ${token}`
+                        },
+
+                        body: JSON.stringify({
+                            approval_status: approvalStatus
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        alert(data.message || 'Η ενημέρωση της αίτησης απέτυχε.');
+
+                        return;
+                    }
+
+                    await loadUsers();
+                } catch (error) {
+                    console.error('Provider approval error:', error);
+
+                    alert('Δεν ήταν δυνατή η επικοινωνία με τον server.');
+                }
+            };
+
+            if (approveProviderButton) {
+                approveProviderButton.addEventListener('click', async () => {
+                    const confirmed = confirm(
+                        `Θέλεις να εγκρίνεις τον πάροχο ${user.first_name} ${user.last_name};`
+                    );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    await updateProviderApproval('approved');
+                });
+            }
+
+            if (rejectProviderButton) {
+                rejectProviderButton.addEventListener('click', async () => {
+                    const confirmed = confirm(
+                        `Θέλεις να απορρίψεις την αίτηση του ${user.first_name} ${user.last_name};`
+                    );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    await updateProviderApproval('rejected');
                 });
             }
         });

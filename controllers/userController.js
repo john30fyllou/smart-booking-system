@@ -3,8 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const getAllUsers = (req, res) => {
-    const sql = 'SELECT id, first_name, last_name, email, role, created_at FROM users';
-
+    const sql =
+        'SELECT id, first_name, last_name, email, role, approval_status, created_at FROM users';
     db.query(sql, (err, results) => {
         if (err) {
             console.error('error fetching users: ', err);
@@ -18,7 +18,7 @@ const getAllUsers = (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { first_name, last_name, email, password } = req.body;
+        const { first_name, last_name, email, password, role } = req.body;
 
         if (!first_name || !last_name || !email || !password) {
             return res.status(400).json({
@@ -26,27 +26,73 @@ const registerUser = async (req, res) => {
             });
         }
 
+        if (password.length < 8) {
+            return res.status(400).json({
+                message: 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.'
+            });
+        }
+
+        if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+            return res.status(400).json({
+                message: 'Ο κωδικός πρέπει να περιέχει τουλάχιστον ένα γράμμα και έναν αριθμό.'
+            });
+        }
+
+        const requestedRole = role || 'customer';
+
+        if (!['customer', 'provider'].includes(requestedRole)) {
+            return res.status(400).json({
+                message: 'Invalid registration role'
+            });
+        }
+
+        const approvalStatus = requestedRole === 'provider' ? 'pending' : 'approved';
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const sql = `
-            INSERT INTO users (first_name, last_name, email, password)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO users
+            (
+                first_name,
+                last_name,
+                email,
+                password,
+                role,
+                approval_status
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
         `;
 
-        db.query(sql, [first_name, last_name, email, hashedPassword], (err, result) => {
-            if (err) {
-                console.error('Error creating user:', err);
+        db.query(
+            sql,
+            [first_name, last_name, email, hashedPassword, requestedRole, approvalStatus],
+            (err, result) => {
+                if (err) {
+                    console.error('Error creating user:', err);
 
-                return res.status(500).json({
-                    message: 'Database error'
+                    if (err.code === 'ER_DUP_ENTRY') {
+                        return res.status(409).json({
+                            message: 'Υπάρχει ήδη λογαριασμός με αυτό το email.'
+                        });
+                    }
+
+                    return res.status(500).json({
+                        message: 'Database error'
+                    });
+                }
+
+                res.status(201).json({
+                    message:
+                        requestedRole === 'provider'
+                            ? 'Provider registration submitted for admin approval'
+                            : 'User registered successfully',
+
+                    userId: result.insertId,
+                    role: requestedRole,
+                    approvalStatus
                 });
             }
-
-            res.status(201).json({
-                message: 'User registered successfully',
-                userId: result.insertId
-            });
-        });
+        );
     } catch (error) {
         console.error('Registration error:', error);
 
@@ -90,6 +136,20 @@ const loginUser = (req, res) => {
             return res.status(401).json({
                 message: 'Invalid email or password'
             });
+        }
+
+        if (user.role === 'provider' && user.approval_status !== 'approved') {
+            if (user.approval_status === 'pending') {
+                return res.status(403).json({
+                    message: 'Ο λογαριασμός παρόχου αναμένει έγκριση από διαχειριστή.'
+                });
+            }
+
+            if (user.approval_status === 'rejected') {
+                return res.status(403).json({
+                    message: 'Η αίτηση εγγραφής ως πάροχος έχει απορριφθεί.'
+                });
+            }
         }
 
         const token = jwt.sign(
@@ -298,10 +358,52 @@ const deleteUser = (req, res) => {
     });
 };
 
+const updateProviderApproval = (req, res) => {
+    const userId = Number(req.params.id);
+    const { approval_status } = req.body;
+
+    if (!['approved', 'rejected'].includes(approval_status)) {
+        return res.status(400).json({
+            message: 'Invalid approval status'
+        });
+    }
+
+    const sql = `
+        UPDATE users
+        SET approval_status = ?
+        WHERE id = ?
+        AND role = 'provider'
+    `;
+
+    db.query(sql, [approval_status, userId], (err, result) => {
+        if (err) {
+            console.error('Error updating provider approval:', err);
+
+            return res.status(500).json({
+                message: 'Database error'
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Provider not found'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Provider approval status updated successfully',
+
+            userId,
+            approval_status
+        });
+    });
+};
+
 module.exports = {
     getAllUsers,
     registerUser,
     loginUser,
     updateUserRole,
-    deleteUser
+    deleteUser,
+    updateProviderApproval
 };

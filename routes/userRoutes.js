@@ -11,7 +11,8 @@ const {
     registerUser,
     loginUser,
     updateUserRole,
-    deleteUser
+    deleteUser,
+    updateProviderApproval
 } = require('../controllers/userController');
 
 router.get('/', authenticateToken, authorizeRoles('admin'), getAllUsers);
@@ -38,4 +39,5 @@ router.get('/provider-area', authenticateToken, authorizeRoles('provider', 'admi
 
 router.delete('/:id', authenticateToken, authorizeRoles('admin'), deleteUser);
 
+router.patch('/:id/approval', authenticateToken, authorizeRoles('admin'), updateProviderApproval);
 module.exports = router;
