@@ -26,22 +26,52 @@
         </header>
 
         <main class="dashboard">
-            <section class="container dashboard-section">
-                <h2>Πίνακας Διαχειριστή</h2>
+            <section class="container dashboard-section admin-welcome">
+                <div>
+                    <p class="section-eyebrow">Admin Dashboard</p>
 
-                <p>Συνολική εποπτεία χρηστών, κρατήσεων και υπηρεσιών του συστήματος.</p>
+                    <h2>Πίνακας Διαχειριστή</h2>
+
+                    <p>
+                        Διαχειρίσου τους χρήστες και παρακολούθησε συνολικά τις κρατήσεις και τις
+                        υπηρεσίες του συστήματος.
+                    </p>
+                </div>
             </section>
 
             <section id="users" class="container dashboard-section">
-                <h2>Χρήστες</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">User Management</p>
 
-                <div id="usersList" class="cards-grid">
+                        <h2>Χρήστες</h2>
+                    </div>
+
+                    <p>Διαχειρίσου ρόλους χρηστών και αιτήσεις νέων παρόχων.</p>
+                </div>
+
+                <div class="admin-info-panel">
+                    <p>
+                        Οι νέοι πάροχοι πρέπει να εγκριθούν από διαχειριστή πριν αποκτήσουν πρόσβαση
+                        στο Provider Dashboard.
+                    </p>
+                </div>
+
+                <div id="usersList" class="cards-grid admin-users-grid">
                     <p>Φόρτωση χρηστών...</p>
                 </div>
             </section>
 
             <section id="bookings" class="container dashboard-section">
-                <h2>Όλες οι κρατήσεις</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">System Overview</p>
+
+                        <h2>Όλες οι κρατήσεις</h2>
+                    </div>
+
+                    <p>Συνολική εικόνα των κρατήσεων που έχουν γίνει στο σύστημα.</p>
+                </div>
 
                 <div id="adminBookingsList" class="cards-grid">
                     <p>Φόρτωση κρατήσεων...</p>
@@ -49,7 +79,15 @@
             </section>
 
             <section id="services" class="container dashboard-section">
-                <h2>Όλες οι υπηρεσίες</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">Service Catalog</p>
+
+                        <h2>Όλες οι υπηρεσίες</h2>
+                    </div>
+
+                    <p>Προβολή των υπηρεσιών που έχουν δημιουργηθεί από τους παρόχους.</p>
+                </div>
 
                 <div id="adminServicesList" class="cards-grid">
                     <p>Φόρτωση υπηρεσιών...</p>

@@ -186,7 +186,10 @@ const loadBookings = async () => {
 
                 <p>
                     <strong>Κατάσταση:</strong>
-                    ${translateStatus(booking.status)}
+
+                    <span class="booking-status status-${booking.status}">
+                        ${translateStatus(booking.status)}
+                    </span>
                 </p>
             `;
 

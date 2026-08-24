@@ -384,7 +384,10 @@ const loadProviderBookings = async () => {
 
                 <p>
                     <strong>Κατάσταση:</strong>
-                    ${translateStatus(booking.status)}
+
+                    <span class="booking-status status-${booking.status}">
+                        ${translateStatus(booking.status)}
+                    </span>
                 </p>
 
                 <div class="booking-actions">
@@ -393,7 +396,7 @@ const loadProviderBookings = async () => {
                         booking.status === 'pending'
                             ? `
                                 <button
-                                    class="btn approve-btn"
+                                    class="success-btn approve-btn"
                                     type="button"
                                 >
                                     Έγκριση
@@ -419,7 +422,7 @@ const loadProviderBookings = async () => {
                         booking.status === 'pending' || booking.status === 'approved'
                             ? `
                                 <button
-                                    class="btn cancel-btn"
+                                    class="danger-btn cancel-btn"
                                     type="button"
                                 >
                                     Ακύρωση
@@ -460,7 +463,80 @@ const loadProviderBookings = async () => {
     } catch (error) {
         console.error('Provider bookings error:', error);
 
-        providerBookingsList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση ραντεβού.</p>';
+        card.innerHTML = `
+        <div class="booking-card-header">
+            <div>
+                <h3>${booking.service_name}</h3>
+    
+                <p>
+                    <strong>Πελάτης:</strong>
+                    ${booking.customer_first_name}
+                    ${booking.customer_last_name}
+                </p>
+            </div>
+    
+            <span class="booking-status status-${booking.status}">
+                ${translateStatus(booking.status)}
+            </span>
+        </div>
+    
+        <div class="booking-details">
+            <p>
+                <strong>Ημερομηνία:</strong>
+                ${formatDate(booking.booking_date)}
+            </p>
+    
+            <p>
+                <strong>Ώρα:</strong>
+                ${booking.start_time}
+                -
+                ${booking.end_time}
+            </p>
+        </div>
+    
+        <div class="booking-actions">
+    
+            ${
+                booking.status === 'pending'
+                    ? `
+                        <button
+                            class="success-btn approve-btn"
+                            type="button"
+                        >
+                            Έγκριση
+                        </button>
+                    `
+                    : ''
+            }
+    
+            ${
+                booking.status === 'approved'
+                    ? `
+                        <button
+                            class="btn complete-btn"
+                            type="button"
+                        >
+                            Ολοκλήρωση
+                        </button>
+                    `
+                    : ''
+            }
+    
+            ${
+                booking.status === 'pending' || booking.status === 'approved'
+                    ? `
+                        <button
+                            class="danger-btn cancel-btn"
+                            type="button"
+                        >
+                            Ακύρωση
+                        </button>
+                    `
+                    : ''
+            }
+    
+        </div>
+    `;
     }
 };
 

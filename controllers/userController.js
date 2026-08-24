@@ -3,15 +3,28 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const getAllUsers = (req, res) => {
-    const sql =
-        'SELECT id, first_name, last_name, email, role, approval_status, created_at FROM users';
-    db.query(sql, (err, results) => {
+    const sql = `
+        SELECT
+            id,
+            first_name,
+            last_name,
+            email,
+            role,
+            approval_status,
+            created_at
+        FROM users
+        WHERE id != ?
+    `;
+
+    db.query(sql, [req.user.id], (err, results) => {
         if (err) {
-            console.error('error fetching users: ', err);
+            console.error('Error fetching users:', err);
+
             return res.status(500).json({
                 message: 'Database error'
             });
         }
+
         res.status(200).json(results);
     });
 };
@@ -182,7 +195,7 @@ const updateUserRole = (req, res) => {
     const adminId = Number(req.user.id);
     const { role } = req.body;
 
-    const allowedRoles = ['customer', 'provider', 'admin'];
+    const allowedRoles = ['customer', 'provider'];
 
     if (!userId) {
         return res.status(400).json({

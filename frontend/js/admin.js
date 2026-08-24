@@ -80,28 +80,36 @@ const loadUsers = async () => {
             card.className = 'dashboard-card';
 
             card.innerHTML = `
-                <h3>
-                    ${user.first_name}
-                    ${user.last_name}
-                </h3>
+                <div class="user-card-header">
+                    <div>
+                        <h3>
+                            ${user.first_name}
+                            ${user.last_name}
+                        </h3>
 
-                <p>
-                    <strong>Email:</strong>
-                    ${user.email}
-                </p>
+                        <p class="user-email">
+                            ${user.email}
+                        </p>
+                    </div>
 
-                <p>
-                    <strong>Ρόλος:</strong>
-                    ${translateRole(user.role)}
-                </p>
+                    <span class="role-badge">
+                        ${translateRole(user.role)}
+                    </span>
+                </div>
 
                 ${
                     user.role === 'provider'
                         ? `
-                            <p>
-                                <strong>Κατάσταση έγκρισης:</strong>
-                                ${translateApprovalStatus(user.approval_status)}
-                            </p>
+                            <div class="approval-row">
+                                <span>Κατάσταση έγκρισης</span>
+
+                                <span
+                                    class="approval-badge
+                                    approval-${user.approval_status}"
+                                >
+                                    ${translateApprovalStatus(user.approval_status)}
+                                </span>
+                            </div>
                         `
                         : ''
                 }
@@ -109,51 +117,49 @@ const loadUsers = async () => {
                 ${
                     user.role !== 'admin'
                         ? `
-                            <div class="form-group">
+                            <div class="admin-user-controls">
 
-                                <label>
-                                    Αλλαγή ρόλου
-                                </label>
+                                <div class="form-group">
+                                    <label>
+                                        Ρόλος χρήστη
+                                    </label>
 
-                                <select
-                                    class="user-role-select"
-                                >
-                                    <option
-                                        value="customer"
-                                        ${user.role === 'customer' ? 'selected' : ''}
+                                    <select
+                                        class="user-role-select"
                                     >
-                                        Πελάτης
-                                    </option>
+                                        <option
+                                            value="customer"
+                                            ${user.role === 'customer' ? 'selected' : ''}
+                                        >
+                                            Πελάτης
+                                        </option>
 
-                                    <option
-                                        value="provider"
-                                        ${user.role === 'provider' ? 'selected' : ''}
+                                        <option
+                                            value="provider"
+                                            ${user.role === 'provider' ? 'selected' : ''}
+                                        >
+                                            Πάροχος
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="admin-user-actions">
+
+                                    <button
+                                        type="button"
+                                        class="btn update-role-btn"
                                     >
-                                        Πάροχος
-                                    </option>
+                                        Αποθήκευση ρόλου
+                                    </button>
 
-                                    <option value="admin">
-                                        Διαχειριστής
-                                    </option>
-                                </select>
+                                    <button
+                                        type="button"
+                                        class="danger-btn delete-user-btn"
+                                    >
+                                        Διαγραφή
+                                    </button>
 
-                            </div>
-
-                            <div class="booking-actions">
-
-                                <button
-                                    type="button"
-                                    class="btn update-role-btn"
-                                >
-                                    Αποθήκευση ρόλου
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="btn delete-user-btn"
-                                >
-                                    Διαγραφή χρήστη
-                                </button>
+                                </div>
 
                             </div>
                         `
@@ -163,21 +169,29 @@ const loadUsers = async () => {
                 ${
                     user.role === 'provider' && user.approval_status === 'pending'
                         ? `
-                            <div class="booking-actions">
+                            <div class="provider-request-actions">
 
-                                <button
-                                    type="button"
-                                    class="btn approve-provider-btn"
-                                >
-                                    Έγκριση
-                                </button>
+                                <p>
+                                    Νέα αίτηση παρόχου
+                                </p>
 
-                                <button
-                                    type="button"
-                                    class="btn reject-provider-btn"
-                                >
-                                    Απόρριψη
-                                </button>
+                                <div class="booking-actions">
+
+                                    <button
+                                        type="button"
+                                        class="success-btn approve-provider-btn"
+                                    >
+                                        Έγκριση
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="danger-btn reject-provider-btn"
+                                    >
+                                        Απόρριψη
+                                    </button>
+
+                                </div>
 
                             </div>
                         `

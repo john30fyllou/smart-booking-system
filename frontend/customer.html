@@ -25,33 +25,56 @@
         </header>
 
         <main class="dashboard">
-            <section class="container dashboard-section">
-                <h2>Καλώς ήρθες</h2>
+            <section class="container dashboard-section customer-welcome">
+                <div>
+                    <p class="section-eyebrow">Customer Dashboard</p>
 
-                <p>Βρες την υπηρεσία που χρειάζεσαι ή περιέγραψέ την με φυσική γλώσσα.</p>
+                    <h2>Καλώς ήρθες</h2>
+
+                    <p>Βρες την υπηρεσία που χρειάζεσαι ή περιέγραψέ την με φυσική γλώσσα.</p>
+                </div>
             </section>
 
             <section class="container dashboard-section">
-                <h2>Έξυπνη αναζήτηση</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">AI Assistant</p>
+                        <h2>Έξυπνη αναζήτηση</h2>
+                    </div>
 
-                <form id="intentForm" class="intent-form">
-                    <input
-                        type="text"
-                        id="intentPrompt"
-                        placeholder="π.χ. Θέλω κούρεμα και styling"
-                        required
-                    />
+                    <p>
+                        Περιέγραψε τι χρειάζεσαι και θα προσπαθήσουμε να βρούμε την καταλληλότερη
+                        υπηρεσία.
+                    </p>
+                </div>
 
-                    <button type="submit" class="btn">Αναζήτηση</button>
-                </form>
+                <div class="search-panel">
+                    <form id="intentForm" class="intent-form">
+                        <input
+                            type="text"
+                            id="intentPrompt"
+                            placeholder="π.χ. Θέλω κούρεμα και styling"
+                            required
+                        />
 
-                <p id="intentMessage" class="message"></p>
+                        <button type="submit" class="btn">Αναζήτηση</button>
+                    </form>
 
-                <div id="aiResult"></div>
+                    <p id="intentMessage" class="message"></p>
+
+                    <div id="aiResult"></div>
+                </div>
             </section>
 
             <section id="services" class="container dashboard-section">
-                <h2>Διαθέσιμες υπηρεσίες</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">Services</p>
+                        <h2>Διαθέσιμες υπηρεσίες</h2>
+                    </div>
+
+                    <p>Επίλεξε μία υπηρεσία για να δεις τις διαθέσιμες ημερομηνίες και ώρες.</p>
+                </div>
 
                 <div id="servicesList" class="cards-grid">
                     <p>Φόρτωση υπηρεσιών...</p>
@@ -63,22 +86,29 @@
                 class="container dashboard-section booking-section"
                 style="display: none"
             >
-                <h2>Νέα κράτηση</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">Booking</p>
+                        <h2>Νέα κράτηση</h2>
+                    </div>
 
-                <div class="dashboard-card">
+                    <p>Επίλεξε ημέρα και μία από τις διαθέσιμες ώρες.</p>
+                </div>
+
+                <div class="dashboard-card booking-panel">
                     <h3 id="selectedServiceName">Επιλεγμένη υπηρεσία</h3>
 
                     <form id="bookingForm">
                         <input type="hidden" id="selectedServiceId" />
 
                         <div class="form-group">
-                            <label for="bookingDate"> Ημερομηνία </label>
+                            <label for="bookingDate">Ημερομηνία</label>
 
                             <input type="date" id="bookingDate" required />
                         </div>
 
                         <div class="form-group">
-                            <label for="bookingTime"> Διαθέσιμη ώρα </label>
+                            <label for="bookingTime">Διαθέσιμη ώρα</label>
 
                             <select id="bookingTime" required>
                                 <option value="">Επίλεξε πρώτα ημερομηνία</option>
@@ -93,7 +123,14 @@
             </section>
 
             <section id="my-bookings" class="container dashboard-section">
-                <h2>Τα ραντεβού μου</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">Appointments</p>
+                        <h2>Τα ραντεβού μου</h2>
+                    </div>
+
+                    <p>Εδώ εμφανίζεται το ιστορικό και η κατάσταση των κρατήσεών σου.</p>
+                </div>
 
                 <div id="bookingsList" class="cards-grid">
                     <p>Φόρτωση κρατήσεων...</p>

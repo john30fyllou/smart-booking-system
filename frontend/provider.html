@@ -26,14 +26,28 @@
         </header>
 
         <main class="dashboard">
-            <section class="container dashboard-section">
-                <h2>Πίνακας Παρόχου</h2>
+            <section class="container dashboard-section provider-welcome">
+                <div>
+                    <p class="section-eyebrow">Provider Dashboard</p>
 
-                <p>Διαχειρίσου τα ραντεβού, τις υπηρεσίες και τη διαθεσιμότητά σου.</p>
+                    <h2>Πίνακας Παρόχου</h2>
+
+                    <p>
+                        Διαχειρίσου τα ραντεβού, τις υπηρεσίες και τη διαθεσιμότητά σου από ένα
+                        σημείο.
+                    </p>
+                </div>
             </section>
 
             <section id="bookings" class="container dashboard-section">
-                <h2>Ραντεβού</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">Appointments</p>
+                        <h2>Ραντεβού</h2>
+                    </div>
+
+                    <p>Δες τις κρατήσεις σου και ενημέρωσε την κατάστασή τους.</p>
+                </div>
 
                 <div id="providerBookingsList" class="cards-grid">
                     <p>Φόρτωση ραντεβού...</p>
@@ -41,42 +55,65 @@
             </section>
 
             <section id="services" class="container dashboard-section">
-                <h2>Οι υπηρεσίες μου</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">Services</p>
+                        <h2>Οι υπηρεσίες μου</h2>
+                    </div>
 
-                <div class="dashboard-card">
-                    <h3>Προσθήκη υπηρεσίας</h3>
+                    <p>Πρόσθεσε νέες υπηρεσίες και διαχειρίσου όσες προσφέρεις.</p>
+                </div>
+
+                <div class="dashboard-card management-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Προσθήκη υπηρεσίας</h3>
+
+                            <p>Συμπλήρωσε τα στοιχεία της υπηρεσίας που θέλεις να προσφέρεις.</p>
+                        </div>
+                    </div>
 
                     <form id="serviceForm">
-                        <div class="form-group">
-                            <label for="serviceCategory"> Κατηγορία </label>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="serviceCategory">Κατηγορία</label>
 
-                            <select id="serviceCategory" required>
-                                <option value="">Επίλεξε κατηγορία</option>
-                            </select>
+                                <select id="serviceCategory" required>
+                                    <option value="">Επίλεξε κατηγορία</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="serviceName">Όνομα υπηρεσίας</label>
+
+                                <input type="text" id="serviceName" required />
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="serviceName"> Όνομα υπηρεσίας </label>
-
-                            <input type="text" id="serviceName" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="serviceDescription"> Περιγραφή </label>
+                            <label for="serviceDescription">Περιγραφή</label>
 
                             <textarea id="serviceDescription" rows="4"></textarea>
                         </div>
 
-                        <div class="form-group">
-                            <label for="serviceDuration"> Διάρκεια (λεπτά) </label>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="serviceDuration"> Διάρκεια (λεπτά) </label>
 
-                            <input type="number" id="serviceDuration" min="5" required />
-                        </div>
+                                <input type="number" id="serviceDuration" min="5" required />
+                            </div>
 
-                        <div class="form-group">
-                            <label for="servicePrice"> Τιμή (€) </label>
+                            <div class="form-group">
+                                <label for="servicePrice">Τιμή (€)</label>
 
-                            <input type="number" id="servicePrice" min="0" step="0.01" required />
+                                <input
+                                    type="number"
+                                    id="servicePrice"
+                                    min="0"
+                                    step="0.01"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <button type="submit" class="btn" id="serviceSubmitBtn">Προσθήκη</button>
@@ -91,83 +128,97 @@
             </section>
 
             <section id="availability" class="container dashboard-section">
-                <h2>Η διαθεσιμότητά μου</h2>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">Availability</p>
+                        <h2>Η διαθεσιμότητά μου</h2>
+                    </div>
 
-                <div class="dashboard-card">
-                    <h3>Προσθήκη διαθεσιμότητας</h3>
+                    <p>
+                        Δήλωσε τις ημέρες και ώρες στις οποίες μπορούν να πραγματοποιηθούν
+                        κρατήσεις.
+                    </p>
+                </div>
+
+                <div class="dashboard-card management-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Προσθήκη διαθεσιμότητας</h3>
+
+                            <p>Επίλεξε ημερομηνία και το χρονικό διάστημα που είσαι διαθέσιμος.</p>
+                        </div>
+                    </div>
 
                     <form id="availabilityForm">
                         <div class="form-group">
-                            <label for="availabilityDate"> Ημερομηνία </label>
+                            <label for="availabilityDate">Ημερομηνία</label>
 
                             <input type="date" id="availabilityDate" required />
                         </div>
 
-                        <div class="form-group">
-                            <label> Ώρα έναρξης </label>
+                        <div class="availability-time-grid">
+                            <div class="form-group">
+                                <label>Ώρα έναρξης</label>
 
-                            <div class="time-picker">
-                                <select id="availabilityStartHour" required>
-                                    <option value="">Ώρα</option>
+                                <div class="time-picker">
+                                    <select id="availabilityStartHour" required>
+                                        <option value="">Ώρα</option>
+                                        <option value="08">08</option>
+                                        <option value="09">09</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                        <option value="21">21</option>
+                                    </select>
 
-                                    <option value="08">08</option>
-                                    <option value="09">09</option>
-                                    <option value="10">10</option>
-                                    <option value="11">11</option>
-                                    <option value="12">12</option>
-                                    <option value="13">13</option>
-                                    <option value="14">14</option>
-                                    <option value="15">15</option>
-                                    <option value="16">16</option>
-                                    <option value="17">17</option>
-                                    <option value="18">18</option>
-                                    <option value="19">19</option>
-                                    <option value="20">20</option>
-                                    <option value="21">21</option>
-                                </select>
+                                    <span>:</span>
 
-                                <span>:</span>
-
-                                <select id="availabilityStartMinute" required>
-                                    <option value="">Λεπτά</option>
-
-                                    <option value="00">00</option>
-                                    <option value="30">30</option>
-                                </select>
+                                    <select id="availabilityStartMinute" required>
+                                        <option value="">Λεπτά</option>
+                                        <option value="00">00</option>
+                                        <option value="30">30</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label> Ώρα λήξης </label>
+                            <div class="form-group">
+                                <label>Ώρα λήξης</label>
 
-                            <div class="time-picker">
-                                <select id="availabilityEndHour" required>
-                                    <option value="">Ώρα</option>
+                                <div class="time-picker">
+                                    <select id="availabilityEndHour" required>
+                                        <option value="">Ώρα</option>
+                                        <option value="08">08</option>
+                                        <option value="09">09</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                        <option value="21">21</option>
+                                    </select>
 
-                                    <option value="08">08</option>
-                                    <option value="09">09</option>
-                                    <option value="10">10</option>
-                                    <option value="11">11</option>
-                                    <option value="12">12</option>
-                                    <option value="13">13</option>
-                                    <option value="14">14</option>
-                                    <option value="15">15</option>
-                                    <option value="16">16</option>
-                                    <option value="17">17</option>
-                                    <option value="18">18</option>
-                                    <option value="19">19</option>
-                                    <option value="20">20</option>
-                                    <option value="21">21</option>
-                                </select>
+                                    <span>:</span>
 
-                                <span>:</span>
-
-                                <select id="availabilityEndMinute" required>
-                                    <option value="">Λεπτά</option>
-
-                                    <option value="00">00</option>
-                                    <option value="30">30</option>
-                                </select>
+                                    <select id="availabilityEndMinute" required>
+                                        <option value="">Λεπτά</option>
+                                        <option value="00">00</option>
+                                        <option value="30">30</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
