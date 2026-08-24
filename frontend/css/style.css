@@ -1065,3 +1065,23 @@ footer {
     background-color: #fff4d6;
     color: #9a6700;
 }
+
+.bookings-group {
+    margin-top: 28px;
+}
+
+.bookings-group + .bookings-group {
+    margin-top: 40px;
+}
+
+.bookings-group-title {
+    margin-bottom: 14px;
+
+    font-size: 18px;
+}
+
+.history-booking-card {
+    opacity: 0.82;
+
+    background-color: #fafafa;
+}

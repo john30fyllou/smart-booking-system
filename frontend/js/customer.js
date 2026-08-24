@@ -6,7 +6,8 @@ if (!token || (role !== 'customer' && role !== 'admin')) {
 }
 
 const servicesList = document.getElementById('servicesList');
-const bookingsList = document.getElementById('bookingsList');
+const activeBookingsList = document.getElementById('activeBookingsList');
+const bookingHistoryList = document.getElementById('bookingHistoryList');
 
 const bookingDateInput = document.getElementById('bookingDate');
 const bookingTimeSelect = document.getElementById('bookingTime');
@@ -20,6 +21,8 @@ const bookingForm = document.getElementById('bookingForm');
 const bookingMessage = document.getElementById('bookingMessage');
 
 const logoutBtn = document.getElementById('logoutBtn');
+
+let reschedulingBookingId = null;
 
 const formatDate = (dateString) => {
     const [year, month, day] = dateString.split('-');
@@ -104,6 +107,10 @@ const loadServices = async () => {
             const bookingButton = card.querySelector('.book-service-btn');
 
             bookingButton.addEventListener('click', () => {
+                // Αν πριν αλλάζαμε υπάρχον ραντεβού,
+                // επιστρέφουμε σε λειτουργία νέας κράτησης.
+                reschedulingBookingId = null;
+
                 document.getElementById('selectedServiceId').value = service.id;
 
                 document.getElementById('selectedServiceName').textContent = service.name;
@@ -144,61 +151,211 @@ const loadBookings = async () => {
 
         const bookings = await response.json();
 
-        bookingsList.innerHTML = '';
+        activeBookingsList.innerHTML = '';
+        bookingHistoryList.innerHTML = '';
 
         if (!response.ok) {
-            bookingsList.innerHTML = `<p>${bookings.message || 'Δεν ήταν δυνατή η φόρτωση κρατήσεων.'}</p>`;
+            activeBookingsList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση κρατήσεων.</p>';
 
             return;
         }
 
-        if (bookings.length === 0) {
-            bookingsList.innerHTML = '<p>Δεν έχεις ακόμη κρατήσεις.</p>';
+        const activeBookings = bookings.filter(
+            (booking) => booking.status === 'pending' || booking.status === 'approved'
+        );
 
-            return;
+        const historyBookings = bookings.filter(
+            (booking) => booking.status === 'completed' || booking.status === 'cancelled'
+        );
+
+        if (activeBookings.length === 0) {
+            activeBookingsList.innerHTML = '<p>Δεν έχεις ενεργά ραντεβού.</p>';
+        } else {
+            activeBookings.forEach((booking) => {
+                const card = document.createElement('div');
+
+                card.className = 'dashboard-card';
+
+                card.innerHTML = `
+                    <h3>${booking.service_name}</h3>
+
+                    <p>
+                        <strong>Ημερομηνία:</strong>
+                        ${formatDate(booking.booking_date)}
+                    </p>
+
+                    <p>
+                        <strong>Ώρα:</strong>
+                        ${booking.start_time}
+                        -
+                        ${booking.end_time}
+                    </p>
+
+                    <p>
+                        <strong>Πάροχος:</strong>
+                        ${booking.provider_first_name}
+                        ${booking.provider_last_name}
+                    </p>
+
+                    <p>
+                        <strong>Κατάσταση:</strong>
+
+                        <span
+                            class="booking-status
+                            status-${booking.status}"
+                        >
+                            ${translateStatus(booking.status)}
+                        </span>
+                    </p>
+
+                    <div class="booking-actions">
+                        <button
+                            type="button"
+                            class="
+                                btn
+                                customer-reschedule-booking-btn
+                            "
+                        >
+                            Αλλαγή ραντεβού
+                        </button>
+
+                        <button
+                            type="button"
+                            class="
+                                danger-btn
+                                customer-cancel-booking-btn
+                            "
+                        >
+                            Ακύρωση
+                        </button>
+                    </div>
+                `;
+
+                activeBookingsList.appendChild(card);
+
+                const rescheduleButton = card.querySelector('.customer-reschedule-booking-btn');
+
+                rescheduleButton.addEventListener('click', () => {
+                    reschedulingBookingId = booking.id;
+
+                    document.getElementById('selectedServiceId').value = booking.service_id;
+
+                    document.getElementById('selectedServiceName').textContent =
+                        booking.service_name;
+
+                    bookingDateInput.value = booking.booking_date.split('T')[0];
+
+                    bookingTimeSelect.innerHTML = `
+                        <option value="">
+                            Φόρτωση διαθέσιμων ωρών...
+                        </option>
+                    `;
+
+                    bookingDateInput.dispatchEvent(new Event('change'));
+
+                    bookingMessage.textContent = 'Επίλεξε νέα ημερομηνία και ώρα.';
+
+                    const bookingSection = document.getElementById('booking-section');
+
+                    bookingSection.style.display = 'block';
+
+                    bookingSection.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+
+                const cancelButton = card.querySelector('.customer-cancel-booking-btn');
+
+                cancelButton.addEventListener('click', async () => {
+                    const confirmed = confirm('Θέλεις σίγουρα να ακυρώσεις αυτό το ραντεβού;');
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`${API_URL}/bookings/${booking.id}/cancel`, {
+                            method: 'PATCH',
+
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            alert(data.message || 'Η ακύρωση του ραντεβού απέτυχε.');
+
+                            return;
+                        }
+
+                        // Αν ακυρώθηκε το booking
+                        // που επεξεργαζόμασταν.
+                        if (reschedulingBookingId === booking.id) {
+                            reschedulingBookingId = null;
+
+                            document.getElementById('booking-section').style.display = 'none';
+                        }
+
+                        await loadBookings();
+                    } catch (error) {
+                        console.error('Customer cancel booking error:', error);
+
+                        alert('Δεν ήταν δυνατή η επικοινωνία με τον server.');
+                    }
+                });
+            });
         }
 
-        bookings.forEach((booking) => {
-            const card = document.createElement('div');
+        if (historyBookings.length === 0) {
+            bookingHistoryList.innerHTML = '<p>Δεν υπάρχει ιστορικό ραντεβού.</p>';
+        } else {
+            historyBookings.forEach((booking) => {
+                const card = document.createElement('div');
 
-            card.className = 'dashboard-card';
+                card.className = 'dashboard-card history-booking-card';
 
-            card.innerHTML = `
-                <h3>${booking.service_name}</h3>
+                card.innerHTML = `
+                    <h3>${booking.service_name}</h3>
 
-                <p>
-                    <strong>Ημερομηνία:</strong>
-                    ${formatDate(booking.booking_date)}
-                </p>
+                    <p>
+                        <strong>Ημερομηνία:</strong>
+                        ${formatDate(booking.booking_date)}
+                    </p>
 
-                <p>
-                    <strong>Ώρα:</strong>
-                    ${booking.start_time}
-                    -
-                    ${booking.end_time}
-                </p>
+                    <p>
+                        <strong>Ώρα:</strong>
+                        ${booking.start_time}
+                        -
+                        ${booking.end_time}
+                    </p>
 
-                <p>
-                    <strong>Πάροχος:</strong>
-                    ${booking.provider_first_name}
-                    ${booking.provider_last_name}
-                </p>
+                    <p>
+                        <strong>Πάροχος:</strong>
+                        ${booking.provider_first_name}
+                        ${booking.provider_last_name}
+                    </p>
 
-                <p>
-                    <strong>Κατάσταση:</strong>
+                    <p>
+                        <strong>Κατάσταση:</strong>
 
-                    <span class="booking-status status-${booking.status}">
-                        ${translateStatus(booking.status)}
-                    </span>
-                </p>
-            `;
+                        <span
+                            class="booking-status
+                            status-${booking.status}"
+                        >
+                            ${translateStatus(booking.status)}
+                        </span>
+                    </p>
+                `;
 
-            bookingsList.appendChild(card);
-        });
+                bookingHistoryList.appendChild(card);
+            });
+        }
     } catch (error) {
         console.error('Bookings loading error:', error);
 
-        bookingsList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση κρατήσεων.</p>';
+        activeBookingsList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση κρατήσεων.</p>';
     }
 };
 
@@ -224,16 +381,20 @@ bookingDateInput.addEventListener('change', async () => {
     }
 
     try {
-        const response = await fetch(
+        let slotsUrl =
             `${API_URL}/bookings/available-slots` +
-                `?service_id=${serviceId}` +
-                `&date=${selectedDate}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+            `?service_id=${serviceId}` +
+            `&date=${selectedDate}`;
+
+        if (reschedulingBookingId) {
+            slotsUrl += `&exclude_booking_id=` + `${reschedulingBookingId}`;
+        }
+
+        const response = await fetch(slotsUrl, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-        );
+        });
 
         const data = await response.json();
 
@@ -299,11 +460,32 @@ bookingForm.addEventListener('submit', async (event) => {
         return;
     }
 
-    bookingMessage.textContent = 'Γίνεται δημιουργία της κράτησης...';
+    const isRescheduling = reschedulingBookingId !== null;
+
+    bookingMessage.textContent = isRescheduling
+        ? 'Γίνεται αλλαγή του ραντεβού...'
+        : 'Γίνεται δημιουργία της κράτησης...';
 
     try {
-        const response = await fetch(`${API_URL}/bookings`, {
-            method: 'POST',
+        const url = isRescheduling
+            ? `${API_URL}/bookings/${reschedulingBookingId}/reschedule`
+            : `${API_URL}/bookings`;
+
+        const method = isRescheduling ? 'PATCH' : 'POST';
+
+        const requestBody = isRescheduling
+            ? {
+                  booking_date: bookingDate,
+                  start_time: startTime
+              }
+            : {
+                  service_id: serviceId,
+                  booking_date: bookingDate,
+                  start_time: startTime
+              };
+
+        const response = await fetch(url, {
+            method,
 
             headers: {
                 'Content-Type': 'application/json',
@@ -311,26 +493,36 @@ bookingForm.addEventListener('submit', async (event) => {
                 Authorization: `Bearer ${token}`
             },
 
-            body: JSON.stringify({
-                service_id: serviceId,
-                booking_date: bookingDate,
-                start_time: startTime
-            })
+            body: JSON.stringify(requestBody)
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            bookingMessage.textContent = data.message || 'Η κράτηση απέτυχε';
+            bookingMessage.textContent =
+                data.message ||
+                (isRescheduling ? 'Η αλλαγή του ραντεβού απέτυχε.' : 'Η κράτηση απέτυχε.');
 
             return;
         }
 
-        bookingMessage.textContent = 'Η κράτηση δημιουργήθηκε επιτυχώς!';
+        bookingMessage.textContent = isRescheduling
+            ? 'Το ραντεβού άλλαξε επιτυχώς και περιμένει νέα έγκριση.'
+            : 'Η κράτηση δημιουργήθηκε επιτυχώς!';
+
+        reschedulingBookingId = null;
 
         await loadBookings();
 
-        bookingDateInput.dispatchEvent(new Event('change'));
+        bookingDateInput.value = '';
+
+        bookingTimeSelect.innerHTML = `
+                <option value="">
+                    Επίλεξε πρώτα ημερομηνία
+                </option>
+            `;
+
+        document.getElementById('booking-section').style.display = 'none';
     } catch (error) {
         console.error('Booking error:', error);
 

@@ -12,7 +12,8 @@ const {
     createBooking,
     updateBookingStatus,
     cancelBooking,
-    getAvailableSlots
+    getAvailableSlots,
+    rescheduleBooking
 } = require('../controllers/bookingController');
 
 router.get(
@@ -44,4 +45,10 @@ router.patch(
 
 router.patch('/:id/cancel', authenticateToken, authorizeRoles('customer', 'admin'), cancelBooking);
 
+router.patch(
+    '/:id/reschedule',
+    authenticateToken,
+    authorizeRoles('customer', 'admin'),
+    rescheduleBooking
+);
 module.exports = router;

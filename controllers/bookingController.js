@@ -39,6 +39,7 @@ const getMyBookings = (req, res) => {
     const sql = `
         SELECT
             bookings.id,
+            bookings.service_id,
             bookings.booking_date,
             bookings.start_time,
             bookings.end_time,
@@ -414,6 +415,7 @@ const cancelBooking = (req, res) => {
 const getAvailableSlots = (req, res) => {
     const serviceId = Number(req.query.service_id);
     const bookingDate = req.query.date;
+    const excludeBookingId = Number(req.query.exclude_booking_id) || null;
 
     if (!serviceId || !bookingDate) {
         return res.status(400).json({
@@ -453,7 +455,7 @@ const getAvailableSlots = (req, res) => {
                     end_time
                 FROM availability
                 WHERE provider_id = ?
-                AND available_date = ?
+                  AND available_date = ?
             `;
 
         db.query(
@@ -476,19 +478,21 @@ const getAvailableSlots = (req, res) => {
 
                 const bookingsSql = `
                         SELECT
+                            bookings.id,
                             bookings.start_time,
                             bookings.end_time
-                            FROM bookings
-                            JOIN services
+                        FROM bookings
+                        JOIN services
                             ON bookings.service_id = services.id
-                            WHERE services.provider_id = ?
-                            AND bookings.booking_date = ?
-                            AND bookings.status IN ('pending', 'approved')
+                        WHERE services.provider_id = ?
+                          AND bookings.booking_date = ?
+                          AND bookings.status IN ('pending', 'approved')
+                          AND (? IS NULL OR bookings.id != ?)
                     `;
 
                 db.query(
                     bookingsSql,
-                    [service.provider_id, bookingDate],
+                    [service.provider_id, bookingDate, excludeBookingId, excludeBookingId],
                     (bookingsError, bookings) => {
                         if (bookingsError) {
                             console.error(bookingsError);
@@ -525,6 +529,7 @@ const getAvailableSlots = (req, res) => {
 
                             while (current + duration <= availabilityEnd) {
                                 const slotStart = current;
+
                                 const slotEnd = current + duration;
 
                                 const hasConflict = bookings.some((booking) => {
@@ -555,6 +560,176 @@ const getAvailableSlots = (req, res) => {
     });
 };
 
+const rescheduleBooking = (req, res) => {
+    const bookingId = Number(req.params.id);
+    const customerId = Number(req.user.id);
+
+    const { booking_date, start_time } = req.body;
+
+    if (!bookingId || !booking_date || !start_time) {
+        return res.status(400).json({
+            message: 'Booking date and start time are required'
+        });
+    }
+
+    const bookingSql = `
+        SELECT
+            bookings.id,
+            bookings.customer_id,
+            bookings.service_id,
+            bookings.status,
+            services.provider_id,
+            services.duration_minutes
+        FROM bookings
+        JOIN services
+            ON bookings.service_id = services.id
+        WHERE bookings.id = ?
+    `;
+
+    db.query(bookingSql, [bookingId], (bookingError, bookingResults) => {
+        if (bookingError) {
+            console.error('Error fetching booking:', bookingError);
+
+            return res.status(500).json({
+                message: 'Database error'
+            });
+        }
+
+        if (bookingResults.length === 0) {
+            return res.status(404).json({
+                message: 'Booking not found'
+            });
+        }
+
+        const booking = bookingResults[0];
+
+        if (req.user.role !== 'admin' && Number(booking.customer_id) !== customerId) {
+            return res.status(403).json({
+                message: 'Access denied'
+            });
+        }
+
+        if (booking.status === 'cancelled' || booking.status === 'completed') {
+            return res.status(400).json({
+                message: 'Only active bookings can be rescheduled'
+            });
+        }
+
+        const calculateEndTime = (startTime, durationMinutes) => {
+            const [hours, minutes, seconds] = startTime.split(':').map(Number);
+
+            const startDate = new Date();
+
+            startDate.setHours(hours, minutes, seconds || 0, 0);
+
+            startDate.setMinutes(startDate.getMinutes() + Number(durationMinutes));
+
+            return startDate.toTimeString().slice(0, 8);
+        };
+
+        const endTime = calculateEndTime(start_time, booking.duration_minutes);
+
+        const availabilitySql = `
+                SELECT id
+                FROM availability
+                WHERE provider_id = ?
+                  AND available_date = ?
+                  AND start_time <= ?
+                  AND end_time >= ?
+            `;
+
+        db.query(
+            availabilitySql,
+            [booking.provider_id, booking_date, start_time, endTime],
+            (availabilityError, availabilityResults) => {
+                if (availabilityError) {
+                    console.error('Error checking availability:', availabilityError);
+
+                    return res.status(500).json({
+                        message: 'Database error'
+                    });
+                }
+
+                if (availabilityResults.length === 0) {
+                    return res.status(400).json({
+                        message: 'Provider is not available at the selected time'
+                    });
+                }
+
+                const conflictSql = `
+                        SELECT bookings.id
+                        FROM bookings
+                        JOIN services
+                            ON bookings.service_id = services.id
+                        WHERE services.provider_id = ?
+                          AND bookings.booking_date = ?
+                          AND bookings.status IN ('pending', 'approved')
+                          AND bookings.id != ?
+                          AND bookings.start_time < ?
+                          AND bookings.end_time > ?
+                    `;
+
+                db.query(
+                    conflictSql,
+                    [booking.provider_id, booking_date, bookingId, endTime, start_time],
+                    (conflictError, conflictResults) => {
+                        if (conflictError) {
+                            console.error('Error checking booking conflicts:', conflictError);
+
+                            return res.status(500).json({
+                                message: 'Database error'
+                            });
+                        }
+
+                        if (conflictResults.length > 0) {
+                            return res.status(409).json({
+                                message: 'Selected time conflicts with an existing booking'
+                            });
+                        }
+
+                        const updateSql = `
+                                UPDATE bookings
+                                SET
+                                    booking_date = ?,
+                                    start_time = ?,
+                                    end_time = ?,
+                                    status = 'pending'
+                                WHERE id = ?
+                            `;
+
+                        db.query(
+                            updateSql,
+                            [booking_date, start_time, endTime, bookingId],
+                            (updateError, result) => {
+                                if (updateError) {
+                                    console.error('Error rescheduling booking:', updateError);
+
+                                    return res.status(500).json({
+                                        message: 'Database error'
+                                    });
+                                }
+
+                                res.status(200).json({
+                                    message: 'Booking rescheduled successfully',
+
+                                    bookingId,
+
+                                    booking: {
+                                        bookingDate: booking_date,
+                                        startTime: start_time,
+                                        endTime,
+                                        status: 'pending'
+                                    }
+                                });
+                            }
+                        );
+                    }
+                );
+            }
+        );
+    });
+};
+
 module.exports = {
     getAllBookings,
     getMyBookings,
@@ -562,5 +737,6 @@ module.exports = {
     createBooking,
     updateBookingStatus,
     cancelBooking,
-    getAvailableSlots
+    getAvailableSlots,
+    rescheduleBooking
 };
