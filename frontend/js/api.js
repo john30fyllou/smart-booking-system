@@ -1,1 +1,1 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://smart-booking-system-production.up.railway.app/api';

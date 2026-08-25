@@ -1,5 +1,4 @@
-CREATE DATABASE IF NOT EXISTS smart_booking_system;
-USE smart_booking_system;
+USE railway;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -8,6 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('customer', 'provider', 'admin') NOT NULL DEFAULT 'customer',
+    approval_status ENUM('pending', 'approved', 'rejected')
+        NOT NULL DEFAULT 'approved',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
