@@ -15,10 +15,13 @@
                 <h1>Smart Booking System</h1>
 
                 <nav>
-                    <a href="provider.html">Αρχική</a>
-                    <a href="#bookings">Ραντεβού</a>
-                    <a href="#services">Υπηρεσίες</a>
-                    <a href="#availability">Διαθεσιμότητα</a>
+                    <a href="#" class="provider-nav-link active" data-section="bookings"
+                        >Ραντεβού</a
+                    >
+                    <a href="#" class="provider-nav-link" data-section="services">Υπηρεσίες</a>
+                    <a href="#" class="provider-nav-link" data-section="availability"
+                        >Διαθεσιμότητα</a
+                    >
 
                     <button id="logoutBtn" class="nav-button">Αποσύνδεση</button>
                 </nav>
@@ -241,6 +244,35 @@
         </footer>
 
         <script src="js/api.js"></script>
+        <script>
+            const providerNavLinks = document.querySelectorAll('.provider-nav-link');
+
+            const providerSections = {
+                bookings: document.getElementById('bookings'),
+                services: document.getElementById('services'),
+                availability: document.getElementById('availability')
+            };
+
+            const showProviderSection = (sectionName) => {
+                Object.entries(providerSections).forEach(([name, section]) => {
+                    section.style.display = name === sectionName ? 'block' : 'none';
+                });
+
+                providerNavLinks.forEach((link) => {
+                    link.classList.toggle('active', link.dataset.section === sectionName);
+                });
+            };
+
+            providerNavLinks.forEach((link) => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    showProviderSection(link.dataset.section);
+                });
+            });
+
+            showProviderSection('bookings');
+        </script>
+
         <script src="js/provider.js"></script>
     </body>
 </html>
