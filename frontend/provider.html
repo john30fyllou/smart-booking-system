@@ -52,8 +52,34 @@
                     <p>Δες τις κρατήσεις σου και ενημέρωσε την κατάστασή τους.</p>
                 </div>
 
-                <div id="providerBookingsList" class="cards-grid">
-                    <p>Φόρτωση ραντεβού...</p>
+                <div class="provider-calendar-panel">
+                    <div class="calendar-toolbar">
+                        <button type="button" id="previousMonthBtn" class="calendar-nav-btn">
+                            ‹
+                        </button>
+
+                        <h3 id="calendarMonthTitle"></h3>
+
+                        <button type="button" id="nextMonthBtn" class="calendar-nav-btn">›</button>
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <span>Δευ</span>
+                        <span>Τρι</span>
+                        <span>Τετ</span>
+                        <span>Πεμ</span>
+                        <span>Παρ</span>
+                        <span>Σαβ</span>
+                        <span>Κυρ</span>
+                    </div>
+
+                    <div id="providerCalendar" class="provider-calendar"></div>
+                </div>
+
+                <div class="booking-day-details">
+                    <h3 id="selectedBookingDateTitle">Επίλεξε ημέρα για να δεις τα ραντεβού</h3>
+
+                    <div id="providerBookingsList" class="cards-grid"></div>
                 </div>
             </section>
 
@@ -123,6 +149,17 @@
                     </form>
 
                     <p id="serviceMessage" class="message"></p>
+                </div>
+
+                <div class="services-filter">
+                    <div>
+                        <span class="services-filter-label">Φιλτράρισμα υπηρεσιών</span>
+                        <p>Εμφάνισε τις υπηρεσίες ανά κατηγορία.</p>
+                    </div>
+
+                    <select id="serviceCategoryFilter">
+                        <option value="">Όλες οι κατηγορίες</option>
+                    </select>
                 </div>
 
                 <div id="providerServicesList" class="cards-grid">

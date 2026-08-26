@@ -1,4 +1,5 @@
 const db = require('../db');
+
 const { GoogleGenAI } = require('@google/genai');
 
 const ai = new GoogleGenAI({
@@ -7,6 +8,7 @@ const ai = new GoogleGenAI({
 
 const analyzeIntent = async (req, res) => {
     const customerId = req.user.id;
+
     const { prompt } = req.body;
 
     if (!prompt || !prompt.trim()) {
@@ -60,18 +62,26 @@ const analyzeIntent = async (req, res) => {
                     category: service.category_name
                 }));
 
+                console.time('Gemini response time');
+
                 const response = await ai.models.generateContent({
                     model: 'gemini-3.6-flash',
 
                     contents: `
 User request:
+
 ${prompt}
 
 Available services:
+
 ${JSON.stringify(serviceCatalog)}
                     `,
 
                     config: {
+                        thinkingConfig: {
+                            thinkingLevel: 'minimal'
+                        },
+
                         systemInstruction: `
 You analyze service booking requests written in Greek.
 
@@ -79,6 +89,11 @@ You must select the most appropriate service ONLY from
 the available services provided to you.
 
 Do not invent a new service.
+
+Pay attention to the complete meaning of the user request.
+
+If multiple available services are similar, select the one
+whose name and description best match all parts of the request.
 
 Return:
 - serviceId: the ID of the best matching service
@@ -105,14 +120,17 @@ Return:
                     }
                 });
 
+                console.timeEnd('Gemini response time');
+
                 // 3. Read Gemini result
                 const aiResult = JSON.parse(response.text);
 
                 const serviceId = Number(aiResult.serviceId);
+
                 const confidence = Number(aiResult.confidence);
 
                 // 4. Make sure Gemini selected a real service
-                const matchedService = services.find((service) => service.id === serviceId);
+                const matchedService = services.find((service) => Number(service.id) === serviceId);
 
                 if (!matchedService) {
                     return res.status(500).json({
@@ -159,9 +177,7 @@ Return:
 
                             intent: {
                                 category: matchedService.category_name,
-
                                 service: matchedService.name,
-
                                 confidence
                             },
 
@@ -192,7 +208,7 @@ Return:
     } catch (error) {
         console.error('Intent analysis error:', error);
 
-        res.status(500).json({
+        return res.status(500).json({
             message: 'Internal server error'
         });
     }

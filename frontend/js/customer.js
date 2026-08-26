@@ -17,12 +17,19 @@ const intentPrompt = document.getElementById('intentPrompt');
 const intentMessage = document.getElementById('intentMessage');
 const aiResult = document.getElementById('aiResult');
 
+const serviceSuggestions = document.getElementById('serviceSuggestions');
+let availableServices = [];
 const bookingForm = document.getElementById('bookingForm');
 const bookingMessage = document.getElementById('bookingMessage');
 
 const logoutBtn = document.getElementById('logoutBtn');
-
 let reschedulingBookingId = null;
+
+const serviceCategoryFilters = document.getElementById('serviceCategoryFilters');
+const showMoreServicesBtn = document.getElementById('showMoreServicesBtn');
+
+let selectedServiceCategory = 'all';
+let visibleServicesCount = 8;
 
 const formatDate = (dateString) => {
     const [year, month, day] = dateString.split('-');
@@ -41,99 +48,157 @@ const translateStatus = (status) => {
     return statuses[status] || status;
 };
 
+const renderServiceFilters = () => {
+    serviceCategoryFilters.innerHTML = '';
+
+    const categories = [
+        ...new Set(availableServices.map((service) => service.category_name).filter(Boolean))
+    ];
+
+    const filterOptions = ['all', ...categories];
+
+    filterOptions.forEach((category) => {
+        const button = document.createElement('button');
+
+        button.type = 'button';
+        button.className = 'service-filter-btn';
+
+        if (category === selectedServiceCategory) {
+            button.classList.add('active');
+        }
+
+        button.textContent = category === 'all' ? 'Όλες' : category;
+
+        button.addEventListener('click', () => {
+            selectedServiceCategory = category;
+            visibleServicesCount = 6;
+
+            renderServiceFilters();
+            renderServices();
+        });
+
+        serviceCategoryFilters.appendChild(button);
+    });
+};
+
+const renderServices = () => {
+    servicesList.innerHTML = '';
+
+    const filteredServices =
+        selectedServiceCategory === 'all'
+            ? availableServices
+            : availableServices.filter(
+                  (service) => service.category_name === selectedServiceCategory
+              );
+
+    if (filteredServices.length === 0) {
+        servicesList.innerHTML = '<p>Δεν υπάρχουν υπηρεσίες σε αυτή την κατηγορία.</p>';
+
+        showMoreServicesBtn.style.display = 'none';
+        return;
+    }
+
+    const visibleServices = filteredServices.slice(0, visibleServicesCount);
+
+    visibleServices.forEach((service) => {
+        const card = document.createElement('div');
+
+        card.className = 'dashboard-card';
+
+        card.innerHTML = `
+            <h3>${service.name}</h3>
+
+            <p>${service.description || ''}</p>
+
+            <p>
+                <strong>Κατηγορία:</strong>
+                ${service.category_name}
+            </p>
+
+            <p>
+                <strong>Πάροχος:</strong>
+                ${service.provider_first_name}
+                ${service.provider_last_name}
+            </p>
+
+            <p>
+                <strong>Διάρκεια:</strong>
+                ${service.duration_minutes} λεπτά
+            </p>
+
+            <p>
+                <strong>Τιμή:</strong>
+                ${service.price} €
+            </p>
+
+            <button
+                class="btn book-service-btn"
+                type="button"
+            >
+                Κράτηση
+            </button>
+        `;
+
+        servicesList.appendChild(card);
+
+        const bookingButton = card.querySelector('.book-service-btn');
+
+        bookingButton.addEventListener('click', () => {
+            reschedulingBookingId = null;
+
+            document.getElementById('selectedServiceId').value = service.id;
+
+            document.getElementById('selectedServiceName').textContent = service.name;
+
+            bookingDateInput.value = '';
+
+            bookingTimeSelect.innerHTML = `
+                <option value="">
+                    Επίλεξε πρώτα ημερομηνία
+                </option>
+            `;
+
+            bookingMessage.textContent = '';
+
+            const bookingSection = document.getElementById('booking-section');
+
+            bookingSection.style.display = 'block';
+
+            bookingSection.scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    showMoreServicesBtn.style.display =
+        filteredServices.length > visibleServicesCount ? 'inline-flex' : 'none';
+};
+
 const loadServices = async () => {
     try {
         const response = await fetch(`${API_URL}/services`);
-
         const services = await response.json();
 
         servicesList.innerHTML = '';
 
         if (!response.ok) {
             servicesList.innerHTML = '<p>Δεν ήταν δυνατή η φόρτωση υπηρεσιών.</p>';
-
             return;
         }
 
         if (services.length === 0) {
             servicesList.innerHTML = '<p>Δεν υπάρχουν διαθέσιμες υπηρεσίες.</p>';
-
             return;
         }
 
-        services.forEach((service) => {
-            const card = document.createElement('div');
+        // Αποθηκεύουμε όλες τις υπηρεσίες
+        availableServices = services;
 
-            card.className = 'dashboard-card';
+        // Φτιάχνουμε τα φίλτρα κατηγοριών
+        renderServiceFilters();
 
-            card.innerHTML = `
-                <h3>${service.name}</h3>
-
-                <p>
-                    ${service.description || ''}
-                </p>
-
-                <p>
-                    <strong>Κατηγορία:</strong>
-                    ${service.category_name}
-                </p>
-
-                <p>
-                    <strong>Πάροχος:</strong>
-                    ${service.provider_first_name}
-                    ${service.provider_last_name}
-                </p>
-
-                <p>
-                    <strong>Διάρκεια:</strong>
-                    ${service.duration_minutes} λεπτά
-                </p>
-
-                <p>
-                    <strong>Τιμή:</strong>
-                    ${service.price} €
-                </p>
-
-                <button
-                    class="btn book-service-btn"
-                    type="button"
-                >
-                    Κράτηση
-                </button>
-            `;
-
-            servicesList.appendChild(card);
-
-            const bookingButton = card.querySelector('.book-service-btn');
-
-            bookingButton.addEventListener('click', () => {
-                // Αν πριν αλλάζαμε υπάρχον ραντεβού,
-                // επιστρέφουμε σε λειτουργία νέας κράτησης.
-                reschedulingBookingId = null;
-
-                document.getElementById('selectedServiceId').value = service.id;
-
-                document.getElementById('selectedServiceName').textContent = service.name;
-
-                bookingDateInput.value = '';
-
-                bookingTimeSelect.innerHTML = `
-                    <option value="">
-                        Επίλεξε πρώτα ημερομηνία
-                    </option>
-                `;
-
-                bookingMessage.textContent = '';
-
-                const bookingSection = document.getElementById('booking-section');
-
-                bookingSection.style.display = 'block';
-
-                bookingSection.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
+        // Εμφανίζουμε τις πρώτες 6 υπηρεσίες
+        renderServices();
     } catch (error) {
         console.error('Services loading error:', error);
 
@@ -527,6 +592,84 @@ bookingForm.addEventListener('submit', async (event) => {
         console.error('Booking error:', error);
 
         bookingMessage.textContent = 'Δεν ήταν δυνατή η επικοινωνία με τον server.';
+    }
+});
+
+const normalizeText = (text) => {
+    return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+};
+
+const hideServiceSuggestions = () => {
+    serviceSuggestions.innerHTML = '';
+    serviceSuggestions.style.display = 'none';
+};
+
+intentPrompt.addEventListener('input', () => {
+    const query = normalizeText(intentPrompt.value.trim());
+
+    serviceSuggestions.innerHTML = '';
+
+    if (query.length < 2) {
+        hideServiceSuggestions();
+        return;
+    }
+
+    const matchingServices = availableServices
+        .filter((service) => {
+            const name = normalizeText(service.name || '');
+
+            const words = name.split(/\s+/);
+
+            return words.some((word) => word.startsWith(query));
+        })
+        .sort((a, b) => {
+            const nameA = normalizeText(a.name || '');
+            const nameB = normalizeText(b.name || '');
+
+            return nameA.localeCompare(nameB, 'el');
+        })
+        .slice(0, 5);
+    if (matchingServices.length === 0) {
+        hideServiceSuggestions();
+        return;
+    }
+
+    matchingServices.forEach((service) => {
+        const suggestion = document.createElement('button');
+
+        suggestion.type = 'button';
+        suggestion.className = 'service-suggestion';
+
+        suggestion.innerHTML = `
+            <span class="suggestion-name">
+                ${service.name}
+            </span>
+
+            <span class="suggestion-category">
+                ${service.category_name}
+            </span>
+        `;
+
+        suggestion.addEventListener('click', () => {
+            intentPrompt.value = service.name;
+
+            hideServiceSuggestions();
+
+            intentPrompt.focus();
+        });
+
+        serviceSuggestions.appendChild(suggestion);
+    });
+
+    serviceSuggestions.style.display = 'block';
+});
+
+document.addEventListener('click', (event) => {
+    if (!intentPrompt.contains(event.target) && !serviceSuggestions.contains(event.target)) {
+        hideServiceSuggestions();
     }
 });
 

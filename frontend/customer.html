@@ -15,9 +15,12 @@
                 <h1>Smart Booking System</h1>
 
                 <nav>
-                    <a href="customer.html">Αρχική</a>
-                    <a href="#services">Υπηρεσίες</a>
-                    <a href="#my-bookings">Τα ραντεβού μου</a>
+                    <a href="#" class="customer-nav-link active" data-section="home">Αρχική</a>
+                    <a href="#" class="customer-nav-link" data-section="services">Υπηρεσίες</a>
+                    <a href="#" class="customer-nav-link" data-section="bookings"
+                        >Τα ραντεβού μου</a
+                    >
+                    <a href="#" class="customer-nav-link" data-section="history">Ιστορικό</a>
 
                     <button id="logoutBtn" class="nav-button">Αποσύνδεση</button>
                 </nav>
@@ -50,12 +53,21 @@
 
                 <div class="search-panel">
                     <form id="intentForm" class="intent-form">
-                        <input
-                            type="text"
-                            id="intentPrompt"
-                            placeholder="π.χ. Θέλω κούρεμα και styling"
-                            required
-                        />
+                        <div class="autocomplete-wrapper">
+                            <input
+                                type="text"
+                                id="intentPrompt"
+                                placeholder="π.χ. Θέλω κούρεμα και styling"
+                                autocomplete="off"
+                                required
+                            />
+
+                            <div
+                                id="serviceSuggestions"
+                                class="service-suggestions"
+                                style="display: none"
+                            ></div>
+                        </div>
 
                         <button type="submit" class="btn">Αναζήτηση</button>
                     </form>
@@ -76,8 +88,21 @@
                     <p>Επίλεξε μία υπηρεσία για να δεις τις διαθέσιμες ημερομηνίες και ώρες.</p>
                 </div>
 
+                <div id="serviceCategoryFilters" class="service-category-filters"></div>
+
                 <div id="servicesList" class="cards-grid">
                     <p>Φόρτωση υπηρεσιών...</p>
+                </div>
+
+                <div class="services-more-wrapper">
+                    <button
+                        type="button"
+                        id="showMoreServicesBtn"
+                        class="btn btn-secondary"
+                        style="display: none"
+                    >
+                        Προβολή περισσότερων
+                    </button>
                 </div>
             </section>
 
@@ -129,7 +154,7 @@
                         <h2>Τα ραντεβού μου</h2>
                     </div>
 
-                    <p>Διαχειρίσου τα ενεργά ραντεβού σου και δες το ιστορικό σου.</p>
+                    <p>Διαχειρίσου τα ενεργά ραντεβού σου.</p>
                 </div>
 
                 <div class="bookings-group">
@@ -139,10 +164,19 @@
                         <p>Φόρτωση ενεργών ραντεβού...</p>
                     </div>
                 </div>
+            </section>
+
+            <section id="booking-history" class="container dashboard-section">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-eyebrow">History</p>
+                        <h2>Ιστορικό ραντεβού</h2>
+                    </div>
+
+                    <p>Δες τα ολοκληρωμένα και ακυρωμένα ραντεβού σου.</p>
+                </div>
 
                 <div class="bookings-group">
-                    <h3 class="bookings-group-title">Ιστορικό</h3>
-
                     <div id="bookingHistoryList" class="cards-grid">
                         <p>Φόρτωση ιστορικού...</p>
                     </div>
@@ -155,6 +189,46 @@
         </footer>
 
         <script src="js/api.js"></script>
+
+        <script>
+            const customerNavLinks = document.querySelectorAll('.customer-nav-link');
+
+            const customerSections = {
+                home: [
+                    document.querySelector('.customer-welcome'),
+                    document.querySelector('.search-panel').closest('.dashboard-section')
+                ],
+                services: [document.getElementById('services')],
+                bookings: [document.getElementById('my-bookings')],
+                history: [document.getElementById('booking-history')]
+            };
+
+            const showCustomerSection = (sectionName) => {
+                Object.values(customerSections)
+                    .flat()
+                    .forEach((section) => {
+                        section.style.display = 'none';
+                    });
+
+                customerSections[sectionName].forEach((section) => {
+                    section.style.display = 'block';
+                });
+
+                customerNavLinks.forEach((link) => {
+                    link.classList.toggle('active', link.dataset.section === sectionName);
+                });
+            };
+
+            customerNavLinks.forEach((link) => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    showCustomerSection(link.dataset.section);
+                });
+            });
+
+            showCustomerSection('home');
+        </script>
+
         <script src="js/customer.js"></script>
     </body>
 </html>
