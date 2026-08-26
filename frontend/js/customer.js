@@ -743,10 +743,21 @@ intentForm.addEventListener('submit', async (event) => {
                         ${service.price} €
                     </p>
 
-                    <p>
-                        <strong>AI confidence:</strong>
-                        ${Math.round(data.intent.confidence * 100)}%
-                    </p>
+                    ${
+                        data.fallback
+                            ? `
+                                <p>
+                                    <strong>Τρόπος αντιστοίχισης:</strong>
+                                    Τοπική αντιστοίχιση
+                                </p>
+                            `
+                            : `
+                                <p>
+                                    <strong>AI confidence:</strong>
+                                    ${Math.round(data.intent.confidence * 100)}%
+                                </p>
+                            `
+                    }
 
                 </div>
             `;
