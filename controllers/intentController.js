@@ -6,6 +6,51 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
 
+const normalizeText = (text) => {
+    return String(text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+};
+
+const findFallbackService = (prompt, services) => {
+    const normalizedPrompt = normalizeText(prompt);
+
+    let bestMatch = null;
+    let bestScore = 0;
+
+    services.forEach((service) => {
+        const name = normalizeText(service.name);
+        const description = normalizeText(service.description);
+        const category = normalizeText(service.category_name);
+
+        let score = 0;
+
+        const words = normalizedPrompt.split(/\s+/).filter((word) => word.length >= 3);
+
+        words.forEach((word) => {
+            if (name.includes(word)) {
+                score += 3;
+            }
+
+            if (description.includes(word)) {
+                score += 2;
+            }
+
+            if (category.includes(word)) {
+                score += 1;
+            }
+        });
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestMatch = service;
+        }
+    });
+
+    return bestScore > 0 ? bestMatch : null;
+};
+
 const analyzeIntent = async (req, res) => {
     const customerId = req.user.id;
 
@@ -62,42 +107,41 @@ const analyzeIntent = async (req, res) => {
                     category: service.category_name
                 }));
 
-                console.time('Gemini response time');
+                const geminiStartTime = Date.now();
 
                 const response = await ai.models.generateContent({
                     model: 'gemini-3.6-flash',
 
                     contents: `
-User request:
+                            User request:
 
-${prompt}
+                            ${prompt}
 
-Available services:
+                            Available services:
 
-${JSON.stringify(serviceCatalog)}
+                            ${JSON.stringify(serviceCatalog)}
                     `,
-
                     config: {
                         thinkingConfig: {
                             thinkingLevel: 'minimal'
                         },
 
                         systemInstruction: `
-You analyze service booking requests written in Greek.
+                            You analyze service booking requests written in Greek.
 
-You must select the most appropriate service ONLY from
-the available services provided to you.
+                            You must select the most appropriate service ONLY from
+                            the available services provided to you.
 
-Do not invent a new service.
+                            Do not invent a new service.
 
-Pay attention to the complete meaning of the user request.
+                            Pay attention to the complete meaning of the user request.
 
-If multiple available services are similar, select the one
-whose name and description best match all parts of the request.
+                            If multiple available services are similar, select the one
+                            whose name and description best match all parts of the request.
 
-Return:
-- serviceId: the ID of the best matching service
-- confidence: a number between 0 and 1
+                            Return:
+                            - serviceId: the ID of the best matching service
+                            - confidence: a number between 0 and 1
                         `,
 
                         responseMimeType: 'application/json',
@@ -120,7 +164,7 @@ Return:
                     }
                 });
 
-                console.timeEnd('Gemini response time');
+                console.log(`Gemini response time: ${Date.now() - geminiStartTime}ms`);
 
                 // 3. Read Gemini result
                 const aiResult = JSON.parse(response.text);
@@ -199,6 +243,82 @@ Return:
                 );
             } catch (error) {
                 console.error('Gemini error:', error);
+
+                if (error.status === 429) {
+                    console.log('Gemini quota exceeded. Using local fallback.');
+
+                    const matchedService = findFallbackService(prompt, services);
+
+                    if (!matchedService) {
+                        return res.status(503).json({
+                            message:
+                                'Η υπηρεσία AI δεν είναι προσωρινά διαθέσιμη και δεν βρέθηκε ασφαλής αντιστοίχιση.'
+                        });
+                    }
+
+                    const confidence = 0.5;
+
+                    const insertSql = `
+                        INSERT INTO intent_logs
+                        (
+                            customer_id,
+                            user_prompt,
+                            detected_category,
+                            detected_service,
+                            confidence
+                        )
+                        VALUES (?, ?, ?, ?, ?)
+                    `;
+
+                    db.query(
+                        insertSql,
+                        [
+                            customerId,
+                            prompt,
+                            matchedService.category_name,
+                            matchedService.name,
+                            confidence
+                        ],
+                        (err, result) => {
+                            if (err) {
+                                console.error('Error saving fallback intent:', err);
+
+                                return res.status(500).json({
+                                    message: 'Database error'
+                                });
+                            }
+
+                            return res.status(200).json({
+                                message: 'Intent analyzed with local fallback',
+                                intentLogId: result.insertId,
+
+                                intent: {
+                                    category: matchedService.category_name,
+                                    service: matchedService.name,
+                                    confidence
+                                },
+
+                                matchedService: {
+                                    id: matchedService.id,
+                                    name: matchedService.name,
+                                    description: matchedService.description,
+                                    durationMinutes: matchedService.duration_minutes,
+                                    price: matchedService.price,
+
+                                    provider: {
+                                        id: matchedService.provider_id,
+                                        firstName: matchedService.provider_first_name,
+                                        lastName: matchedService.provider_last_name
+                                    }
+                                },
+
+                                fallback: true
+                            });
+                        }
+                    );
+
+                    return;
+                }
 
                 return res.status(500).json({
                     message: 'AI service error'
