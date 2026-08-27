@@ -11,8 +11,9 @@ const calendarMonthTitle = document.getElementById('calendarMonthTitle');
 const selectedBookingDateTitle = document.getElementById('selectedBookingDateTitle');
 const previousMonthBtn = document.getElementById('previousMonthBtn');
 const nextMonthBtn = document.getElementById('nextMonthBtn');
-let providerBookings = [];
+const todayBtn = document.getElementById('todayBtn');
 
+let providerBookings = [];
 let calendarDate = new Date();
 let selectedCalendarDate = null;
 const providerServicesList = document.getElementById('providerServicesList');
@@ -675,6 +676,25 @@ nextMonthBtn.addEventListener('click', () => {
     calendarDate.setMonth(calendarDate.getMonth() + 1);
 
     renderProviderCalendar();
+});
+
+todayBtn.addEventListener('click', () => {
+    const today = new Date();
+
+    calendarDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    selectedCalendarDate =
+        `${today.getFullYear()}-` +
+        `${String(today.getMonth() + 1).padStart(2, '0')}-` +
+        `${String(today.getDate()).padStart(2, '0')}`;
+
+    renderProviderCalendar();
+
+    const todayBookings = providerBookings.filter(
+        (booking) => booking.booking_date === selectedCalendarDate && booking.status !== 'cancelled'
+    );
+
+    renderBookingDetails(todayBookings, selectedCalendarDate);
 });
 
 logoutBtn.addEventListener('click', () => {

@@ -1559,3 +1559,10 @@ footer {
 main.dashboard {
     flex: 1;
 }
+
+#todayBtn {
+    width: auto;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 600;
+}
