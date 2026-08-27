@@ -33,8 +33,6 @@ const serviceMessage = document.getElementById('serviceMessage');
 const serviceSubmitBtn = document.getElementById('serviceSubmitBtn');
 let editingServiceId = null;
 
-const providerBookingsList = document.getElementById('providerBookingsList');
-const providerCalendar = document.getElementById('providerCalendar');
 const providerHistoryList = document.getElementById('providerHistoryList');
 
 const formatDate = (dateString) => {
