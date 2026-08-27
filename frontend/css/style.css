@@ -1567,11 +1567,9 @@ main.dashboard {
     flex: 1;
 }
 
-#todayBtn {
+.calendar-toolbar-actions #todayBtn {
     width: auto;
     min-width: 80px;
-    padding: 0 14px;
+    max-width: max-content;
     flex: 0 0 auto;
-    font-size: 14px;
-    font-weight: 600;
 }
