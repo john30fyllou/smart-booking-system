@@ -14,6 +14,7 @@ const nextMonthBtn = document.getElementById('nextMonthBtn');
 let providerBookings = [];
 
 let calendarDate = new Date();
+let calendarDate = new Date();
 const providerServicesList = document.getElementById('providerServicesList');
 const providerAvailabilityList = document.getElementById('providerAvailabilityList');
 
@@ -521,6 +522,9 @@ const renderProviderCalendar = () => {
 
         dayCell.type = 'button';
         dayCell.className = 'calendar-day';
+        if (dateString === selectedCalendarDate) {
+            dayCell.classList.add('selected');
+        }
 
         const today = new Date();
 
@@ -548,6 +552,8 @@ const renderProviderCalendar = () => {
         `;
 
         dayCell.addEventListener('click', () => {
+            selectedCalendarDate = dateString;
+
             document.querySelectorAll('.calendar-day.selected').forEach((cell) => {
                 cell.classList.remove('selected');
             });
@@ -640,9 +646,18 @@ const loadProviderBookings = async () => {
         renderProviderCalendar();
         renderProviderHistory();
 
-        providerBookingsList.innerHTML = '';
+        if (selectedCalendarDate) {
+            const selectedDayBookings = providerBookings.filter(
+                (booking) =>
+                    booking.booking_date === selectedCalendarDate && booking.status !== 'cancelled'
+            );
 
-        selectedBookingDateTitle.textContent = 'Επίλεξε ημέρα για να δεις τα ραντεβού';
+            renderBookingDetails(selectedDayBookings, selectedCalendarDate);
+        } else {
+            providerBookingsList.innerHTML = '';
+
+            selectedBookingDateTitle.textContent = 'Επίλεξε ημέρα για να δεις τα ραντεβού';
+        }
     } catch (error) {
         console.error('Provider bookings error:', error);
 
