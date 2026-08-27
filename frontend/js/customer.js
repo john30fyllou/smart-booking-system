@@ -759,8 +759,43 @@ intentForm.addEventListener('submit', async (event) => {
                             `
                     }
 
+                    <button
+                        type="button"
+                        id="aiBookServiceBtn"
+                        class="btn"
+                    >
+                        Κράτηση
+                    </button>
+
                 </div>
+        `;
+        const aiBookServiceBtn = document.getElementById('aiBookServiceBtn');
+
+        aiBookServiceBtn.addEventListener('click', () => {
+            reschedulingBookingId = null;
+
+            document.getElementById('selectedServiceId').value = service.id;
+
+            document.getElementById('selectedServiceName').textContent = service.name;
+
+            bookingDateInput.value = '';
+
+            bookingTimeSelect.innerHTML = `
+                <option value="">
+                    Επίλεξε πρώτα ημερομηνία
+                </option>
             `;
+
+            bookingMessage.textContent = '';
+
+            const bookingSection = document.getElementById('booking-section');
+
+            bookingSection.style.display = 'block';
+
+            bookingSection.scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
     } catch (error) {
         console.error('AI error:', error);
 
