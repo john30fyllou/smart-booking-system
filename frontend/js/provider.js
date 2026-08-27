@@ -14,7 +14,7 @@ const nextMonthBtn = document.getElementById('nextMonthBtn');
 let providerBookings = [];
 
 let calendarDate = new Date();
-let calendarDate = new Date();
+let selectedCalendarDate = null;
 const providerServicesList = document.getElementById('providerServicesList');
 const providerAvailabilityList = document.getElementById('providerAvailabilityList');
 
