@@ -33,6 +33,10 @@ const serviceMessage = document.getElementById('serviceMessage');
 const serviceSubmitBtn = document.getElementById('serviceSubmitBtn');
 let editingServiceId = null;
 
+const providerBookingsList = document.getElementById('providerBookingsList');
+const providerCalendar = document.getElementById('providerCalendar');
+const providerHistoryList = document.getElementById('providerHistoryList');
+
 const formatDate = (dateString) => {
     const [year, month, day] = dateString.split('-');
 
@@ -559,6 +563,60 @@ const renderProviderCalendar = () => {
     }
 };
 
+const renderProviderHistory = () => {
+    providerHistoryList.innerHTML = '';
+
+    const historyBookings = providerBookings
+        .filter((booking) => booking.status === 'completed' || booking.status === 'cancelled')
+        .sort((a, b) => {
+            const dateA = new Date(`${a.booking_date}T${a.start_time}`);
+            const dateB = new Date(`${b.booking_date}T${b.start_time}`);
+
+            return dateB - dateA;
+        });
+
+    if (historyBookings.length === 0) {
+        providerHistoryList.innerHTML = '<p>Δεν υπάρχουν ολοκληρωμένα ή ακυρωμένα ραντεβού.</p>';
+
+        return;
+    }
+
+    historyBookings.forEach((booking) => {
+        const card = document.createElement('div');
+
+        card.className = 'dashboard-card';
+
+        card.innerHTML = `
+            <h3>${booking.service_name}</h3>
+
+            <p>
+                <strong>Πελάτης:</strong>
+                ${booking.customer_first_name}
+                ${booking.customer_last_name}
+            </p>
+
+            <p>
+                <strong>Ημερομηνία:</strong>
+                ${formatDate(booking.booking_date)}
+            </p>
+
+            <p>
+                <strong>Ώρα:</strong>
+                ${booking.start_time} - ${booking.end_time}
+            </p>
+
+            <p>
+                <strong>Κατάσταση:</strong>
+                <span class="booking-status status-${booking.status}">
+                    ${translateStatus(booking.status)}
+                </span>
+            </p>
+        `;
+
+        providerHistoryList.appendChild(card);
+    });
+};
+
 const loadProviderBookings = async () => {
     try {
         const response = await fetch(`${API_URL}/bookings/provider`, {
@@ -582,6 +640,7 @@ const loadProviderBookings = async () => {
         providerBookings = bookings;
 
         renderProviderCalendar();
+        renderProviderHistory();
 
         providerBookingsList.innerHTML = '';
 
