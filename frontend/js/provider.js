@@ -512,7 +512,7 @@ const renderProviderCalendar = () => {
             `${year}-${String(month + 1).padStart(2, '0')}-` + `${String(day).padStart(2, '0')}`;
 
         const dayBookings = providerBookings.filter(
-            (booking) => booking.booking_date === dateString
+            (booking) => booking.booking_date === dateString && booking.status !== 'cancelled'
         );
 
         const dayCell = document.createElement('button');
